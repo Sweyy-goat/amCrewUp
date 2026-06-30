@@ -1,92 +1,478 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-[75vh]">
-    <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
-        <div>
-            <h2 class="font-bold text-base">{{ event.title }}</h2>
-            <p class="text-xs text-slate-400">Live chat updates automatically until target session time expires.</p>
-        </div>
-        <a href="/dashboard" class="text-xs text-slate-300 hover:text-white px-2 py-1 bg-slate-800 rounded-lg">Exit Chat</a>
-    </div>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-    <div id="msg-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50">
-        {% for message in messages %}
-        <div class="flex items-start gap-2.5 {% if message.sender.id == current_user.id %}flex-row-reverse{% endif %}">
-            <div class="flex flex-col max-w-[70%]">
-                <span class="text-[10px] text-slate-400 mb-0.5 {% if message.sender.id == current_user.id %}text-right{% endif %}">
-                    {{ message.sender.name }}
-                </span>
-                <p class="p-3 text-sm rounded-2xl shadow-xs {% if message.sender.id == current_user.id %}bg-indigo-600 text-white rounded-tr-none{% else %}bg-white text-slate-800 border border-slate-200 rounded-tl-none{% endif %}">
-                    {{ message.content }}
-                </p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+  :root {
+    /* Apple Light Mode Palette */
+    --sf-ink: #000000;
+    --sf-ink-secondary: #8e8e93;
+    --sf-ink-tertiary: #aeaea2;
+    --sf-bg: #f2f2f7;
+    --sf-surface: #ffffff;
+    --sf-surface-secondary: #f2f2f7;
+    
+    /* Native iMessage Bubble Colors */
+    --sf-bubble-me: #0071e3;
+    --sf-bubble-me-text: #ffffff;
+    --sf-bubble-them: #e9e9eb;
+    --sf-bubble-them-text: #000000;
+    
+    --sf-border: rgba(0, 0, 0, 0.08);
+    --sf-accent: #0071e3;
+    
+    /* Core Physics Curve (Smooth Ease-Out) */
+    --apple-ease: cubic-bezier(0.25, 1, 0.5, 1);
+  }
 
-    <div class="p-3 border-t border-slate-200 bg-white">
-        <div class="flex gap-2">
-            <input type="text" id="user-input" placeholder="Coordinate sync location, matching strategy..." class="flex-grow border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-            <button id="send-btn" class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-xl text-sm hover:bg-indigo-700 transition">Send</button>
-        </div>
+  /* Deep System Dark Mode Integration */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sf-ink: #ffffff;
+      --sf-ink-secondary: #98989d;
+      --sf-ink-tertiary: #636366;
+      --sf-bg: #000000;
+      --sf-surface: #1c1c1e;
+      --sf-surface-secondary: #2c2c2e;
+      
+      --sf-bubble-me: #0071e3;
+      --sf-bubble-me-text: #ffffff;
+      --sf-bubble-them: #262629;
+      --sf-bubble-them-text: #ffffff;
+      
+      --sf-border: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    background: var(--sf-bg);
+    color: var(--sf-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Chat Container Frame */
+  .chat-shell {
+    width: 100%;
+    max-width: 600px;
+    background: var(--sf-surface);
+    border-radius: 28px;
+    border: 1px solid var(--sf-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 640px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Navigation & Header */
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--sf-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--sf-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Native Logo Indicator Box */
+  .event-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--sf-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .event-dot span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sf-surface);
+    display: block;
+  }
+
+  .event-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sf-ink);
+    letter-spacing: -0.15px;
+  }
+
+  .event-sub {
+    font-size: 11px;
+    color: var(--sf-ink-secondary);
+    margin-top: 1px;
+  }
+
+  /* Apple System Green Live Pill Badge */
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #34c759;
+    background: rgba(52, 199, 89, 0.1);
+    border-radius: 99px;
+    padding: 4px 10px;
+    letter-spacing: -0.1px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34c759;
+    position: relative;
+  }
+
+  .live-dot::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0px rgba(52, 199, 89, 0.6);
+    animation: applePulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+
+  @keyframes applePulse {
+    0% { box-shadow: 0 0 0 0px rgba(52, 199, 89, 0.6); opacity: 1; }
+    70% { box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
+    100% { opacity: 0; }
+  }
+
+  .exit-btn {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--sf-accent);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+    margin-left: 8px;
+  }
+
+  .exit-btn:hover {
+    opacity: 0.7;
+  }
+
+  /* Feed Layer Content Container */
+  .msg-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Tight continuous stack spacing */
+    background: var(--sf-surface);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* macOS Clean Scrollbar Implementation */
+  .msg-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  .msg-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .msg-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .msg-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  /* Clean Information Status Separators */
+  .status-line {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sf-ink-secondary);
+    padding: 12px 0;
+    letter-spacing: -0.1px;
+  }
+
+  /* Interactive Message Groupings and Bubble Treatment */
+  .msg-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 72%;
+    position: relative;
+    animation: iMessageIn 0.32s var(--apple-ease) both;
+    will-change: transform, opacity;
+  }
+
+  .msg-row.me { align-self: flex-end; align-items: flex-end; }
+  .msg-row.them { align-self: flex-start; align-items: flex-start; }
+
+  /* Group dynamic spacing logic via adjacent sibling selectors */
+  .msg-row.me + .msg-row.me, 
+  .msg-row.them + .msg-row.them {
+    margin-top: -1px; /* Perfectly links adjacent bubbles vertically */
+  }
+  .msg-row.me + .msg-row.them, 
+  .msg-row.them + .msg-row.me {
+    margin-top: 12px; /* Standard conversational block break */
+  }
+
+  @keyframes iMessageIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .msg-sender {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sf-ink-secondary);
+    margin-bottom: 3px;
+    padding-left: 12px;
+  }
+
+  /* Structural Speaker Hiding Optimization rules */
+  .msg-row.them + .msg-row.them .msg-sender {
+    display: none; /* Emulates native chat clean continuity stacks */
+  }
+
+  .bubble {
+    padding: 10px 16px;
+    font-size: 14px;
+    line-height: 1.4286;
+    letter-spacing: -0.15px;
+  }
+
+  /* Precise CSS Radius Configurations mimicking mobile OS stacks */
+  .me .bubble {
+    background: var(--sf-bubble-me);
+    color: var(--sf-bubble-me-text);
+    border-radius: 18px 18px 4px 18px;
+  }
+  /* Modifying corner curves dynamically when identical classes connect sequentially */
+  .msg-row.me + .msg-row.me .bubble {
+    border-radius: 18px 4px 4px 18px;
+  }
+  .msg-row.me:not(+ .msg-row.me) {
+     border-bottom-right-radius: 18px;
+  }
+
+  .them .bubble {
+    background: var(--sf-bubble-them);
+    color: var(--sf-bubble-them-text);
+    border-radius: 18px 18px 18px 4px;
+  }
+  .msg-row.them + .msg-row.them .bubble {
+    border-radius: 4px 18px 18px 4px;
+  }
+
+  .msg-time {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--sf-ink-tertiary);
+    margin-top: 4px;
+    padding: 0 4px;
+    display: none; /* Hidden by default, exposed cleanly on terminal tail entries */
+  }
+  .msg-row:last-of-type .msg-time {
+    display: block;
+  }
+
+  /* Interactive Input Layout Layer */
+  .composer {
+    padding: 12px 16px 16px;
+    background: var(--sf-surface);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .composer-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .composer-input {
+    width: 100%;
+    padding: 9px 44px 9px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--sf-surface-secondary);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    color: var(--sf-ink);
+    outline: none;
+    letter-spacing: -0.15px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .composer-input::placeholder {
+    color: var(--sf-ink-secondary);
+  }
+
+  .composer-input:focus {
+    background: var(--sf-surface);
+    border-color: rgba(0, 113, 227, 0.4);
+    box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.4);
+  }
+
+  /* Premium iMessage Arrow Inside Input Field Wrapper styling */
+  .send-btn {
+    position: absolute;
+    right: 5px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--sf-accent);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    opacity: 0.4;
+    pointer-events: none; /* Disabled until text insertion criteria is achieved */
+  }
+
+  /* System Active Interactive state when text string is recognized */
+  .composer-input:not(:placeholder-shown) + .send-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .send-btn:active {
+    transform: scale(0.9);
+  }
+
+  .send-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform: rotate(45deg); /* Point up-right like classic system arrow assets */
+    margin-left: -1px;
+    margin-top: 1px;
+  }
+
+  /* Accessibility Safeguards */
+  @media (prefers-reduced-motion: reduce) {
+    .msg-row, .live-dot::after, .send-btn {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<h2 class="sr-only">CampusConnect live event chat</h2>
+<div class="chat-shell">  
+  <div class="chat-header">    
+    <div class="header-left">      
+      <div class="event-dot"><span></span></div>      
+      <div>        
+        <div class="event-title">CSE Turf Booking — Saturday 6PM</div>        
+        <div class="event-sub">Live chat · updates in real time</div>      
+      </div>    
+    </div>    
+    <div style="display:flex;align-items:center;gap:4px">      
+      <div class="live-badge"><span class="live-dot"></span>Live</div>      
+      <a href="#" class="exit-btn">Exit</a>    
+    </div>  
+  </div>
+
+  <div class="msg-list" id="msgList">    
+    <p class="status-line">You joined the group chat</p>
+    
+    <div class="msg-row them">      
+      <div class="msg-sender">Arjun K.</div>      
+      <div class="bubble">Hey everyone, who's confirmed for 6PM? Need at least 8 to book the full turf.</div>      
+      <div class="msg-time">5:41 PM</div>    
     </div>
+    
+    <div class="msg-row them">      
+      <div class="msg-sender">Priya M.</div>      
+      <div class="bubble">I'm in! Can we carpool from campus gate? Asking for 3 seats.</div>      
+      <div class="msg-time">5:43 PM</div>    
+    </div>
+    
+    <div class="msg-row me">      
+      <div class="msg-sender">You</div>      
+      <div class="bubble">Confirmed. I can take 2 more in my car, leaving at 5:30 from Block C.</div>      
+      <div class="msg-time">5:44 PM</div>    
+    </div>
+    
+    <div class="msg-row them">      
+      <div class="msg-sender">Rohith S.</div>      
+      <div class="bubble">Count me in for the ride. Also — split the booking cost equally among confirmed members?</div>      
+      <div class="msg-time">5:45 PM</div>    
+    </div>
+    
+    <div class="msg-row me">      
+      <div class="msg-sender">You</div>      
+      <div class="bubble">Yeah equal split makes sense. I'll collect once we hit 8 confirmed.</div>      
+      <div class="msg-time">5:46 PM</div>    
+    </div>
+    
+    <p class="status-line">Arjun K. joined the event</p>  
+  </div>
+
+  <div class="composer">    
+    <div class="composer-input-wrapper">
+      <input class="composer-input" id="chatInput" type="text" placeholder="iMessage" autocomplete="off">    
+      <button class="send-btn" id="sendBtn" aria-label="Send message">      
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>    
+      </button>  
+    </div>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const socketUrl = protocol + window.location.host;
+const list = document.getElementById('msgList');const input = document.getElementById('chatInput');const btn = document.getElementById('sendBtn');
+function now(){const d=new Date();let h=d.getHours(),m=d.getMinutes(),ampm=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ampm;}
 
-    const socket = io(socketUrl, {
-        transports: ['websocket', 'polling'],
-        upgrade: true,
-        rememberUpgrade: true
-    });
+function send(){  
+  const v=input.value.trim();  
+  if(!v)return;  
+  const row=document.createElement('div');  
+  row.className='msg-row me';  
+  row.innerHTML=`<div class="msg-sender">You</div><div class="bubble">${v}</div><div class="msg-time">${now()}</div>`;  
+  list.appendChild(row);  
+  input.value='';  
+  list.scrollTop=list.scrollHeight;
+}
 
-    const eventId = "{{ event.id }}";
-    const currentUserId = parseInt("{{ current_user.id }}"); // <-- Match tracking by internal numeric ID
-
-    socket.on('connect', () => {
-        socket.emit('join', { event_id: eventId });
-    });
-
-    const sendBtn = document.getElementById('send-btn');
-    const input = document.getElementById('user-input');
-    const container = document.getElementById('msg-container');
-
-    container.scrollTop = container.scrollHeight;
-
-    function dispatchMessage() {
-        if(input.value.trim() !== "") {
-            socket.emit('text', { event_id: eventId, msg: input.value });
-            input.value = "";
-        }
-    }
-
-    sendBtn.addEventListener('click', dispatchMessage);
-    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') dispatchMessage(); });
-
-    socket.on('message', (data) => {
-        const isMe = parseInt(data.user_id) === currentUserId; // <-- Bulletproof matching check
-        const align = isMe ? 'flex-row-reverse' : '';
-        const bg = isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none';
-        const txtAlign = isMe ? 'text-right' : '';
-        
-        const markup = `
-            <div class="flex items-start gap-2.5 ${align}">
-                <div class="flex flex-col max-w-[70%]">
-                    <span class="text-[10px] text-slate-400 mb-0.5 ${txtAlign}">${data.user_name}</span>
-                    <p class="p-3 text-sm rounded-2xl shadow-xs ${bg}">${data.msg}</p>
-                </div>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', markup);
-        container.scrollTop = container.scrollHeight;
-    });
-
-    socket.on('status', (data) => {
-        const statusMarkup = `<p class="text-center text-[11px] text-slate-400 italic my-2">${data.msg}</p>`;
-        container.insertAdjacentHTML('beforeend', statusMarkup);
-        container.scrollTop = container.scrollHeight;
-    });
+btn.addEventListener('click',send);input.addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+setTimeout(()=>{  const r=document.createElement('div');  r.className='msg-row them';  r.innerHTML=`<div class="msg-sender">Priya M.</div><div class="bubble">Just got 2 more from ECE batch — we're at 8 confirmed!</div><div class="msg-time">${now()}</div>`;  list.appendChild(r);  list.scrollTop=list.scrollHeight;},2200);
 </script>
-{% endblock %}
