@@ -3,351 +3,246 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* Disables annoying gray selection flash on tap */
+    -webkit-tap-highlight-color: transparent; 
   }
 
   :root {
-    /* Apple Light Mode Palette */
     --sf-ink: #000000;
     --sf-ink-secondary: #8e8e93;
-    --sf-ink-tertiary: #aeaea2;
-    --sf-bg: #f2f2f7;
-    --sf-surface: #ffffff;
-    --sf-surface-secondary: #f2f2f7;
+    --sf-ink-tertiary: #c7c7cc;
+    --sf-bg: #ffffff;
+    --sf-surface-blur: rgba(255, 255, 255, 0.85);
     
-    /* Native iMessage Bubble Colors */
-    --sf-bubble-me: #0071e3;
+    --sf-bubble-me: #34c759; /* Apple System Green for active coordination */
     --sf-bubble-me-text: #ffffff;
-    --sf-bubble-them: #e9e9eb;
+    --sf-bubble-them: #e5e5ea;
     --sf-bubble-them-text: #000000;
     
-    --sf-border: rgba(0, 0, 0, 0.08);
+    --sf-border: rgba(0, 0, 0, 0.1);
     --sf-accent: #0071e3;
-    
-    /* Core Physics Curve (Smooth Ease-Out) */
     --apple-ease: cubic-bezier(0.25, 1, 0.5, 1);
   }
 
-  /* Deep System Dark Mode Integration */
   @media (prefers-color-scheme: dark) {
     :root {
       --sf-ink: #ffffff;
-      --sf-ink-secondary: #98989d;
-      --sf-ink-tertiary: #636366;
+      --sf-ink-secondary: #8e8e93;
+      --sf-ink-tertiary: #48484a;
       --sf-bg: #000000;
-      --sf-surface: #1c1c1e;
-      --sf-surface-secondary: #2c2c2e;
+      --sf-surface-blur: rgba(28, 28, 30, 0.85);
       
-      --sf-bubble-me: #0071e3;
-      --sf-bubble-me-text: #ffffff;
-      --sf-bubble-them: #262629;
+      --sf-bubble-me: #30d158;
+      --sf-bubble-them: #252528;
       --sf-bubble-them-text: #ffffff;
       
-      --sf-border: rgba(255, 255, 255, 0.1);
+      --sf-border: rgba(255, 255, 255, 0.12);
     }
   }
 
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: fixed; /* Prevents elastic scroll bouncing of the body on iOS */
+  }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     background: var(--sf-bg);
     color: var(--sf-ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 1.5rem;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Chat Container Frame */
-  .chat-shell {
-    width: 100%;
-    max-width: 600px;
-    background: var(--sf-surface);
-    border-radius: 28px;
-    border: 1px solid var(--sf-border);
+  /* Full Screen App Shell Container */
+  .app-shell {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    height: 640px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+    height: 100dvh; /* Dynamic viewport height to account for mobile Safari/Chrome bars */
+    width: 100vw;
+    position: relative;
   }
 
-  /* Navigation & Header */
-  .chat-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--sf-border);
+  /* Floating Sticky Header (iOS Style Navigation Bar) */
+  .app-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 64px;
+    background: var(--sf-surface-blur);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid var(--sf-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--sf-surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: 10;
-    flex-shrink: 0;
+    padding: 0 16px;
+    z-index: 100;
   }
 
-  .header-left {
+  .header-meta {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
-  /* Native Logo Indicator Box */
-  .event-dot {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+  .avatar-ring {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
     background: var(--sf-ink);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+  }
+  .avatar-ring span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--sf-bg);
+    letter-spacing: -0.2px;
   }
 
-  .event-dot span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--sf-surface);
-    display: block;
-  }
-
-  .event-title {
-    font-size: 14px;
+  .title-main {
+    font-size: 15px;
     font-weight: 600;
-    color: var(--sf-ink);
-    letter-spacing: -0.15px;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
   }
 
-  .event-sub {
+  .title-sub {
     font-size: 11px;
     color: var(--sf-ink-secondary);
-    margin-top: 1px;
-  }
-
-  /* Apple System Green Live Pill Badge */
-  .live-badge {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #34c759;
-    background: rgba(52, 199, 89, 0.1);
-    border-radius: 99px;
-    padding: 4px 10px;
-    letter-spacing: -0.1px;
+    gap: 4px;
   }
 
-  .live-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+  /* Pulse indicator for live streaming status */
+  .pulse-dot {
+    width: 5px;
+    height: 5px;
     background: #34c759;
-    position: relative;
-  }
-
-  .live-dot::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
     border-radius: 50%;
-    box-shadow: 0 0 0 0px rgba(52, 199, 89, 0.6);
-    animation: applePulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    display: inline-block;
   }
 
-  @keyframes applePulse {
-    0% { box-shadow: 0 0 0 0px rgba(52, 199, 89, 0.6); opacity: 1; }
-    70% { box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
-    100% { opacity: 0; }
-  }
-
-  .exit-btn {
-    font-size: 13px;
-    font-weight: 500;
+  .exit-action {
+    font-size: 15px;
     color: var(--sf-accent);
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    padding: 4px 8px;
-    cursor: pointer;
     text-decoration: none;
-    transition: opacity 0.15s ease;
-    margin-left: 8px;
+    font-weight: 400;
+    padding: 8px; /* Safe micro tap target */
   }
 
-  .exit-btn:hover {
-    opacity: 0.7;
-  }
-
-  /* Feed Layer Content Container */
-  .msg-list {
+  /* Message Stream Layer (Takes up core space) */
+  .msg-stream {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 80px 14px 84px; /* Padding keeps text clear of floating top/bottom sheets */
     display: flex;
     flex-direction: column;
-    gap: 4px; /* Tight continuous stack spacing */
-    background: var(--sf-surface);
-    -webkit-overflow-scrolling: touch;
+    gap: 3px;
+    -webkit-overflow-scrolling: touch; /* Momentum scrolling */
   }
 
-  /* macOS Clean Scrollbar Implementation */
-  .msg-list::-webkit-scrollbar {
-    width: 8px;
-  }
-  .msg-list::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .msg-list::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    border-radius: 10px;
-  }
-  @media (prefers-color-scheme: dark) {
-    .msg-list::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-    }
-  }
-
-  /* Clean Information Status Separators */
-  .status-line {
-    text-align: center;
+  .status-pill {
+    align-self: center;
     font-size: 11px;
     font-weight: 500;
     color: var(--sf-ink-secondary);
-    padding: 12px 0;
-    letter-spacing: -0.1px;
+    background: var(--sf-border);
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin: 10px 0;
   }
 
-  /* Interactive Message Groupings and Bubble Treatment */
-  .msg-row {
+  .chat-row {
     display: flex;
     flex-direction: column;
-    max-width: 72%;
+    max-width: 75%;
     position: relative;
-    animation: iMessageIn 0.32s var(--apple-ease) both;
+    animation: iosSpring 0.38s var(--apple-ease) both;
     will-change: transform, opacity;
   }
+  .chat-row.me { align-self: flex-end; align-items: flex-end; }
+  .chat-row.them { align-self: flex-start; align-items: flex-start; }
 
-  .msg-row.me { align-self: flex-end; align-items: flex-end; }
-  .msg-row.them { align-self: flex-start; align-items: flex-start; }
+  /* Message spacing structure constraints */
+  .chat-row.me + .chat-row.me, 
+  .chat-row.them + .chat-row.them { margin-top: -1px; }
+  .chat-row.me + .chat-row.them, 
+  .chat-row.them + .chat-row.me { margin-top: 10px; }
 
-  /* Group dynamic spacing logic via adjacent sibling selectors */
-  .msg-row.me + .msg-row.me, 
-  .msg-row.them + .msg-row.them {
-    margin-top: -1px; /* Perfectly links adjacent bubbles vertically */
-  }
-  .msg-row.me + .msg-row.them, 
-  .msg-row.them + .msg-row.me {
-    margin-top: 12px; /* Standard conversational block break */
-  }
-
-  @keyframes iMessageIn {
-    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  @keyframes iosSpring {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .msg-sender {
+  .sender-label {
     font-size: 11px;
     font-weight: 500;
     color: var(--sf-ink-secondary);
-    margin-bottom: 3px;
-    padding-left: 12px;
+    margin-left: 10px;
+    margin-bottom: 2px;
   }
-
-  /* Structural Speaker Hiding Optimization rules */
-  .msg-row.them + .msg-row.them .msg-sender {
-    display: none; /* Emulates native chat clean continuity stacks */
-  }
+  .chat-row.them + .chat-row.them .sender-label { display: none; }
 
   .bubble {
-    padding: 10px 16px;
-    font-size: 14px;
-    line-height: 1.4286;
-    letter-spacing: -0.15px;
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
   }
 
-  /* Precise CSS Radius Configurations mimicking mobile OS stacks */
   .me .bubble {
     background: var(--sf-bubble-me);
     color: var(--sf-bubble-me-text);
     border-radius: 18px 18px 4px 18px;
   }
-  /* Modifying corner curves dynamically when identical classes connect sequentially */
-  .msg-row.me + .msg-row.me .bubble {
-    border-radius: 18px 4px 4px 18px;
-  }
-  .msg-row.me:not(+ .msg-row.me) {
-     border-bottom-right-radius: 18px;
-  }
+  .chat-row.me + .chat-row.me .bubble { border-radius: 18px 4px 4px 18px; }
 
   .them .bubble {
     background: var(--sf-bubble-them);
     color: var(--sf-bubble-them-text);
     border-radius: 18px 18px 18px 4px;
   }
-  .msg-row.them + .msg-row.them .bubble {
-    border-radius: 4px 18px 18px 4px;
+  .chat-row.them + .chat-row.them .bubble { border-radius: 4px 18px 18px 4px; }
+
+  /* Bottom Input Bar Docked Container */
+  .bottom-dock {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--sf-surface-blur);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--sf-border);
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); /* Dynamic home-indicator buffer for iPhone */
+    z-index: 100;
   }
 
-  .msg-time {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--sf-ink-tertiary);
-    margin-top: 4px;
-    padding: 0 4px;
-    display: none; /* Hidden by default, exposed cleanly on terminal tail entries */
-  }
-  .msg-row:last-of-type .msg-time {
-    display: block;
-  }
-
-  /* Interactive Input Layout Layer */
-  .composer {
-    padding: 12px 16px 16px;
-    background: var(--sf-surface);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-
-  .composer-input-wrapper {
+  .input-field-frame {
     position: relative;
-    flex: 1;
     display: flex;
     align-items: center;
   }
 
-  .composer-input {
+  .mobile-input {
     width: 100%;
-    padding: 9px 44px 9px 14px;
-    font-size: 14px;
+    height: 38px;
+    padding: 0 40px 0 14px;
+    font-size: 15px;
     font-family: inherit;
-    background: var(--sf-surface-secondary);
-    border: 1px solid transparent;
-    border-radius: 20px;
+    background: rgba(120, 120, 128, 0.12);
+    border: none;
+    border-radius: 19px;
     color: var(--sf-ink);
     outline: none;
-    letter-spacing: -0.15px;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
-
-  .composer-input::placeholder {
+  .mobile-input::placeholder {
     color: var(--sf-ink-secondary);
   }
 
-  .composer-input:focus {
-    background: var(--sf-surface);
-    border-color: rgba(0, 113, 227, 0.4);
-    box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.4);
-  }
-
-  /* Premium iMessage Arrow Inside Input Field Wrapper styling */
-  .send-btn {
+  /* Core native layout circle send tracking button */
+  .mobile-send {
     position: absolute;
     right: 5px;
     width: 28px;
@@ -355,124 +250,105 @@
     border-radius: 50%;
     background: var(--sf-accent);
     border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
-    opacity: 0.4;
-    pointer-events: none; /* Disabled until text insertion criteria is achieved */
+    transition: opacity 0.2s, transform 0.1s;
+    opacity: 0.2;
+    pointer-events: none;
   }
 
-  /* System Active Interactive state when text string is recognized */
-  .composer-input:not(:placeholder-shown) + .send-btn {
+  .mobile-input:not(:placeholder-shown) + .mobile-send {
     opacity: 1;
     pointer-events: auto;
   }
+  .mobile-send:active { transform: scale(0.9); }
 
-  .send-btn:active {
-    transform: scale(0.9);
-  }
-
-  .send-btn svg {
-    width: 14px;
-    height: 14px;
+  .mobile-send svg {
+    width: 12px;
+    height: 12px;
     fill: none;
     stroke: #ffffff;
-    stroke-width: 2.5;
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transform: rotate(45deg); /* Point up-right like classic system arrow assets */
-    margin-left: -1px;
-    margin-top: 1px;
-  }
-
-  /* Accessibility Safeguards */
-  @media (prefers-reduced-motion: reduce) {
-    .msg-row, .live-dot::after, .send-btn {
-      animation: none !important;
-      transition: none !important;
-    }
+    transform: rotate(45deg);
+    margin-left: -1px; margin-top: 1px;
   }
 </style>
 
-<h2 class="sr-only">CampusConnect live event chat</h2>
-<div class="chat-shell">  
-  <div class="chat-header">    
-    <div class="header-left">      
-      <div class="event-dot"><span></span></div>      
-      <div>        
-        <div class="event-title">CSE Turf Booking — Saturday 6PM</div>        
-        <div class="event-sub">Live chat · updates in real time</div>      
-      </div>    
-    </div>    
-    <div style="display:flex;align-items:center;gap:4px">      
-      <div class="live-badge"><span class="live-dot"></span>Live</div>      
-      <a href="#" class="exit-btn">Exit</a>    
-    </div>  
-  </div>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="header-meta">
+      <div class="avatar-ring"><span>CSE</span></div>
+      <div>
+        <h1 class="title-main">Turf Booking</h1>
+        <div class="title-sub"><span class="pulse-dot"></span> 8 active members</div>
+      </div>
+    </div>
+    <a href="#" class="exit-action">Exit</a>
+  </header>
 
-  <div class="msg-list" id="msgList">    
-    <p class="status-line">You joined the group chat</p>
+  <main class="msg-stream" id="msgStream">
+    <div class="status-pill">You joined the match chat</div>
     
-    <div class="msg-row them">      
-      <div class="msg-sender">Arjun K.</div>      
-      <div class="bubble">Hey everyone, who's confirmed for 6PM? Need at least 8 to book the full turf.</div>      
-      <div class="msg-time">5:41 PM</div>    
+    <div class="chat-row them">
+      <span class="sender-label">Arjun K.</span>
+      <div class="bubble">Hey everyone, who's confirmed for 6PM? Need at least 8 to book the full turf.</div>
     </div>
     
-    <div class="msg-row them">      
-      <div class="msg-sender">Priya M.</div>      
-      <div class="bubble">I'm in! Can we carpool from campus gate? Asking for 3 seats.</div>      
-      <div class="msg-time">5:43 PM</div>    
+    <div class="chat-row them">
+      <span class="sender-label">Priya M.</span>
+      <div class="bubble">I'm in! Can we carpool from campus gate? Asking for 3 seats.</div>
     </div>
     
-    <div class="msg-row me">      
-      <div class="msg-sender">You</div>      
-      <div class="bubble">Confirmed. I can take 2 more in my car, leaving at 5:30 from Block C.</div>      
-      <div class="msg-time">5:44 PM</div>    
+    <div class="chat-row me">
+      <div class="bubble">Confirmed. I can take 2 more in my car, leaving at 5:30 from Block C.</div>
     </div>
     
-    <div class="msg-row them">      
-      <div class="msg-sender">Rohith S.</div>      
-      <div class="bubble">Count me in for the ride. Also — split the booking cost equally among confirmed members?</div>      
-      <div class="msg-time">5:45 PM</div>    
+    <div class="chat-row them">
+      <span class="sender-label">Rohith S.</span>
+      <div class="bubble">Count me in for the ride. Also — split the booking cost equally among confirmed members?</div>
     </div>
     
-    <div class="msg-row me">      
-      <div class="msg-sender">You</div>      
-      <div class="bubble">Yeah equal split makes sense. I'll collect once we hit 8 confirmed.</div>      
-      <div class="msg-time">5:46 PM</div>    
+    <div class="chat-row me">
+      <div class="bubble">Yeah equal split makes sense. I'll collect once we hit 8 confirmed.</div>
     </div>
     
-    <p class="status-line">Arjun K. joined the event</p>  
-  </div>
+    <div class="status-pill">Arjun K. joined the event</div>
+  </main>
 
-  <div class="composer">    
-    <div class="composer-input-wrapper">
-      <input class="composer-input" id="chatInput" type="text" placeholder="iMessage" autocomplete="off">    
-      <button class="send-btn" id="sendBtn" aria-label="Send message">      
-        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>    
-      </button>  
+  <footer class="bottom-dock">
+    <div class="input-field-frame">
+      <input class="mobile-input" id="mInput" type="text" placeholder="iMessage" autocomplete="off">
+      <button class="mobile-send" id="mSend" aria-label="Send">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
     </div>
-  </div>
+  </footer>
 </div>
 
 <script>
-const list = document.getElementById('msgList');const input = document.getElementById('chatInput');const btn = document.getElementById('sendBtn');
-function now(){const d=new Date();let h=d.getHours(),m=d.getMinutes(),ampm=h>=12?'PM':'AM';h=h%12||12;return h+':'+(m<10?'0'+m:m)+' '+ampm;}
+const stream = document.getElementById('msgStream');
+const input = document.getElementById('mInput');
+const btn = document.getElementById('mSend');
 
-function send(){  
-  const v=input.value.trim();  
-  if(!v)return;  
-  const row=document.createElement('div');  
-  row.className='msg-row me';  
-  row.innerHTML=`<div class="msg-sender">You</div><div class="bubble">${v}</div><div class="msg-time">${now()}</div>`;  
-  list.appendChild(row);  
-  input.value='';  
-  list.scrollTop=list.scrollHeight;
+// Automated scroll stabilization focus
+stream.scrollTop = stream.scrollHeight;
+
+function sendMsg() {
+  const txt = input.value.trim();
+  if(!txt) return;
+  
+  const row = document.createElement('div');
+  row.className = 'chat-row me';
+  row.innerHTML = `<div class="bubble">${txt}</div>`;
+  
+  stream.appendChild(row);
+  input.value = '';
+  stream.scrollTop = stream.scrollHeight;
 }
 
-btn.addEventListener('click',send);input.addEventListener('keydown',e=>{if(e.key==='Enter')send()});
-setTimeout(()=>{  const r=document.createElement('div');  r.className='msg-row them';  r.innerHTML=`<div class="msg-sender">Priya M.</div><div class="bubble">Just got 2 more from ECE batch — we're at 8 confirmed!</div><div class="msg-time">${now()}</div>`;  list.appendChild(r);  list.scrollTop=list.scrollHeight;},2200);
+btn.addEventListener('click', sendMsg);
+input.addEventListener('keydown', e => { if(e.key === 'Enter') sendMsg(); });
 </script>
