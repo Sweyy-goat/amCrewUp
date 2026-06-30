@@ -172,13 +172,48 @@
             });
         }
 
+        // ... previous countdown timer JavaScript snippet code is up here ...
+        
         tick();
         setInterval(tick, 1000);
     }
 
-    // Fire engine on document ready load
     document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
 </script>
-    {% endfor %}
-</div>
-{% endblock %}
+
+{% endblock %}  ```
+
+### Complete Structural Reference
+To make sure nothing else was accidentally broken while pasting the loop code earlier, the overall macro-structure of your **`app/templates/dashboard.html`** file should look precisely like this skeleton:
+
+```html
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="flex flex-col ..."> ... </div>
+
+<div id="event-modal" class="hidden ..."> ... </div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for event in events %}
+    <div class="bg-white ...">
+        </div>
+    {% endfor %} </div>
+
+<script>
+    function initializeCampusCountdowns() {  }
+    document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
+</script>
+
+{% endblock %} ```
+
+---
+
+### Push & Verify
+
+Fix the end lines of your file, stage the cleanup, and push back up to Railway:
+
+```bash
+git add app/templates/dashboard.html
+git commit -m "Fix template block closure structural order in dashboard layout"
+git push origin main
