@@ -348,37 +348,29 @@
     <div class="app-header-inner">
       <div class="header-meta">
         <div class="avatar-ring">
-          {% if event.cover_image_url %}
-            <img src="{{ event.cover_image_url }}" alt="">
-          {% else %}
-            <span>{{ event.initials or event.name[:2]|upper }}</span>
-          {% endif %}
+          <span>{{ event.title[:2]|upper }}</span>
         </div>
         <div class="header-text">
-          <h1 class="title-main">{{ event.name }}</h1>
+          <h1 class="title-main">{{ event.title }}</h1>
           <div class="title-sub">
-            <span class="pulse-dot"></span> {{ event.active_member_count }} active member{{ 's' if event.active_member_count != 1 else '' }}
+            <span class="pulse-dot"></span> {{ event.members.count() }} member{{ 's' if event.members.count() != 1 else '' }}
           </div>
         </div>
       </div>
-      <a href="{{ url_for('event_leave', event_id=event.id) }}" class="exit-action">Exit</a>
+      <a href="{{ url_for('dashboard') }}" class="exit-action">Exit</a>
     </div>
   </header>
 
   <main class="msg-stream" id="msgStream">
-    <div class="status-pill">You joined {{ event.name }}</div>
+    <div class="status-pill" id="joinPill">You joined {{ event.title }}</div>
 
     {% for message in messages %}
-      {% if message.is_system %}
-        <div class="status-pill">{{ message.body }}</div>
-      {% else %}
-        <div class="chat-row {{ 'me' if message.sender_id == current_user.id else 'them' }}">
-          {% if message.sender_id != current_user.id %}
-            <span class="sender-label">{{ message.sender_display_name }}</span>
-          {% endif %}
-          <div class="bubble">{{ message.body }}</div>
-        </div>
-      {% endif %}
+      <div class="chat-row {{ 'me' if message.user_id == current_user.id else 'them' }}">
+        {% if message.user_id != current_user.id %}
+          <span class="sender-label">{{ message.sender.name }}</span>
+        {% endif %}
+        <div class="bubble">{{ message.content }}</div>
+      </div>
     {% endfor %}
   </main>
 
@@ -392,35 +384,56 @@
   </footer>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
 const stream = document.getElementById('msgStream');
 const input = document.getElementById('mInput');
 const btn = document.getElementById('mSend');
-const eventId = "{{ event.id }}";
+const eventId = {{ event.id }};
+const myUserId = {{ current_user.id }};
 
 stream.scrollTop = stream.scrollHeight;
 
-function appendRow(html) {
-  const wrap = document.createElement('div');
-  wrap.innerHTML = html.trim();
-  stream.appendChild(wrap.firstChild);
+const socket = io();
+
+socket.on('connect', () => {
+  socket.emit('join', { event_id: eventId });
+});
+
+socket.on('status', (data) => {
+  const pill = document.createElement('div');
+  pill.className = 'status-pill';
+  pill.textContent = data.msg;
+  stream.appendChild(pill);
   stream.scrollTop = stream.scrollHeight;
-}
+});
+
+socket.on('message', (data) => {
+  const isMe = data.user_id === myUserId;
+  const row = document.createElement('div');
+  row.className = `chat-row ${isMe ? 'me' : 'them'}`;
+
+  if (!isMe) {
+    const label = document.createElement('span');
+    label.className = 'sender-label';
+    label.textContent = data.user_name;
+    row.appendChild(label);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = data.msg;
+  row.appendChild(bubble);
+
+  stream.appendChild(row);
+  stream.scrollTop = stream.scrollHeight;
+});
 
 function sendMsg() {
   const txt = input.value.trim();
   if (!txt) return;
-
-  appendRow(`<div class="chat-row me"><div class="bubble"></div></div>`);
-  stream.lastElementChild.querySelector('.bubble').textContent = txt;
+  socket.emit('text', { event_id: eventId, msg: txt });
   input.value = '';
-
-  // POST to the backend; the real message list is the source of truth on reload
-  fetch(`/events/${eventId}/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ body: txt })
-  }).catch(() => {});
 }
 
 btn.addEventListener('click', sendMsg);
