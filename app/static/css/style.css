@@ -1,0 +1,56 @@
+/* Custom Utility Layout & Reset Extensions */
+html, body {
+    height: 100%;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Minimalist Scrollbar for the Live Chat Feed */
+#msg-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+#msg-container::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 1); /* Slate-100 */
+}
+
+#msg-container::-webkit-scrollbar-thumb {
+    background: rgba(203, 213, 225, 1); /* Slate-300 */
+    border-radius: 9999px;
+}
+
+#msg-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 1); /* Slate-400 */
+}
+
+/* Modern Pulse Animation for Active Event Tags */
+.pulse-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981; /* Emerald-500 */
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Input Micro-interactions */
+input:focus, select:focus {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); /* Indigo glow */
+    transition: all 0.2s ease-in-out;
+}

@@ -1,0 +1,20 @@
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environments
+.env
+venv/
+env/
+
+# Instance and local files
+instance/
+.idea/
+.vscode/
+
+# Ignore production uploads (but keep the default image if you want)
+app/static/uploads/*
+!app/static/uploads/default.jpg
