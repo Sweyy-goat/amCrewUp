@@ -15,12 +15,12 @@
     <form action="/create-event" method="POST" class="space-y-4">
         <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
-            <input type="text" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+            <input type="text" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
         </div>
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white">
                     <option value="coding">💻 Coding</option>
                     <option value="going out">🍕 Going Out</option>
                     <option value="rides">🚗 Joined Rides</option>
@@ -30,21 +30,21 @@
             </div>
             <div id="custom-input" class="hidden">
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
-                <input type="text" name="custom_details" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" name="custom_details" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
-                <input type="number" name="total_cost" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="number" name="total_cost" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
-                <input type="number" name="member_limit" min="2" max="50" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="number" name="member_limit" min="2" max="50" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
-                <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white">
                     <option value="All">Open to All</option>
                     <option value="Male">Male Only</option>
                     <option value="Female">Female Only</option>
@@ -54,11 +54,11 @@
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Time & Date</label>
-                <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
-                <input type="text" name="location" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" name="location" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
         </div>
         <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
@@ -66,20 +66,16 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for event in events %}
     <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
-        
         <div class="absolute top-0 left-0 right-0 h-1 bg-slate-100">
             <div class="h-full bg-indigo-600 transition-all duration-1000" id="progress-bar-{{ event.id }}"></div>
         </div>
-
         <div class="mt-2">
             <div class="flex justify-between items-start">
                 <span class="text-xs uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded">
                     {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
                 </span>
-                
                 <span id="countdown-badge-{{ event.id }}" 
                       data-deadline="{{ event.event_time.isoformat() }}" 
                       data-joined="{{ 'true' if current_user in event.members else 'false' }}"
@@ -87,16 +83,13 @@
                     Calculating...
                 </span>
             </div>
-            
             <h2 class="text-lg font-bold text-slate-900 mt-3">{{ event.title }}</h2>
-            
             <div class="mt-4 text-xs space-y-2 text-slate-500">
                 <p>📍 {{ event.location }}</p>
                 <p>⏰ {{ event.event_time.strftime('%b %d, %I:%M %p') }}</p>
                 <p>👥 Joined: {{ event.members.count() }} / {{ event.member_limit }} positions</p>
             </div>
         </div>
-
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
             <span class="text-xs text-slate-400">Host: {{ event.host.name }}</span>
             <div id="action-wrapper-{{ event.id }}">
@@ -117,17 +110,14 @@
         
         function tick() {
             const now = new Date();
-
             badges.forEach(badge => {
                 const eventId = badge.id.split('-').pop();
-                const deadline = new Date(badge.getAttribute('data-deadline') + 'Z'); // Appends 'Z' to treat string accurately as UTC
+                const deadline = new Date(badge.getAttribute('data-deadline') + 'Z');
                 const isJoined = badge.getAttribute('data-joined') === 'true';
-                
                 let timeDifference = deadline - now;
                 
-                // If the deadline has passed, check if they get the extra 2 minutes grace period
                 if (timeDifference <= 0) {
-                    const gracePeriod = 2 * 60 * 1000; // 2 minutes in ms
+                    const gracePeriod = 2 * 60 * 1000;
                     const timeSinceExpired = now - deadline;
 
                     if (isJoined && timeSinceExpired < gracePeriod) {
@@ -137,11 +127,8 @@
                         badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600";
                         return;
                     } else {
-                        // Completely expired threshold met
                         badge.innerText = "⌛ Expired";
                         badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500";
-                        
-                        // Disable the join button immediately in the client layer
                         const joinBtn = document.getElementById(`join-btn-${eventId}`);
                         if (joinBtn) {
                             joinBtn.className = "px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-medium cursor-not-allowed pointer-events-none";
@@ -151,7 +138,6 @@
                     }
                 }
 
-                // Standard ticking math configuration
                 const totalSeconds = Math.floor(timeDifference / 1000);
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -160,60 +146,18 @@
                 let timeString = "";
                 if (hours > 0) timeString += `${hours}h `;
                 timeString += `${minutes}m ${seconds}s`;
-
                 badge.innerText = `⏱️ ${timeString}`;
                 
-                // Urgency context color changes
-                if (totalSeconds < 300) { // Under 5 minutes left
+                if (totalSeconds < 300) {
                     badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator";
                 } else {
                     badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600";
                 }
             });
         }
-
-        // ... previous countdown timer JavaScript snippet code is up here ...
-        
         tick();
         setInterval(tick, 1000);
     }
-
     document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
 </script>
-
-{% endblock %}  ```
-
-### Complete Structural Reference
-To make sure nothing else was accidentally broken while pasting the loop code earlier, the overall macro-structure of your **`app/templates/dashboard.html`** file should look precisely like this skeleton:
-
-```html
-{% extends 'base.html' %}
-{% block content %}
-
-<div class="flex flex-col ..."> ... </div>
-
-<div id="event-modal" class="hidden ..."> ... </div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for event in events %}
-    <div class="bg-white ...">
-        </div>
-    {% endfor %} </div>
-
-<script>
-    function initializeCampusCountdowns() {  }
-    document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
-</script>
-
-{% endblock %} ```
-
----
-
-### Push & Verify
-
-Fix the end lines of your file, stage the cleanup, and push back up to Railway:
-
-```bash
-git add app/templates/dashboard.html
-git commit -m "Fix template block closure structural order in dashboard layout"
-git push origin main
+{% endblock %}
