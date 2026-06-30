@@ -29,4 +29,9 @@ def create_app():
         from . import events
         db.create_all() # Automatically creates MySQL tables if they don't exist in Railway
 
+    # Ensure upload directory path exists dynamically on the runtime environment
+    import os
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
     return app
