@@ -14,7 +14,7 @@
         <div class="flex items-start gap-2.5 {% if message.sender.id == current_user.id %}flex-row-reverse{% endif %}">
             <div class="flex flex-col max-w-[70%]">
                 <span class="text-[10px] text-slate-400 mb-0.5 {% if message.sender.id == current_user.id %}text-right{% endif %}">
-                    {{ message.sender.roll_number }}
+                    {{ message.sender.name }}
                 </span>
                 <p class="p-3 text-sm rounded-2xl shadow-xs {% if message.sender.id == current_user.id %}bg-indigo-600 text-white rounded-tr-none{% else %}bg-white text-slate-800 border border-slate-200 rounded-tl-none{% endif %}">
                     {{ message.content }}
@@ -32,14 +32,11 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='../socket.io/socket.io.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    // Automatically capture your live deployment's domain structure
     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const socketUrl = protocol + window.location.host;
 
-    // Explicitly configure production handshake parameters
     const socket = io(socketUrl, {
         transports: ['websocket', 'polling'],
         upgrade: true,
@@ -47,16 +44,10 @@
     });
 
     const eventId = "{{ event.id }}";
-    const currentRoll = "{{ current_user.roll_number }}";
+    const currentUserId = parseInt("{{ current_user.id }}"); // <-- Match tracking by internal numeric ID
 
-    // Debugging verification log visible in browser console (Inspect Element)
     socket.on('connect', () => {
-        console.log('Successfully synchronized with campus chat engine via WebSocket.');
         socket.emit('join', { event_id: eventId });
-    });
-
-    socket.on('connect_error', (error) => {
-        console.error('WebSocket Handshake Failed:', error);
     });
 
     const sendBtn = document.getElementById('send-btn');
@@ -76,7 +67,7 @@
     input.addEventListener('keypress', (e) => { if(e.key === 'Enter') dispatchMessage(); });
 
     socket.on('message', (data) => {
-        const isMe = data.user === currentRoll;
+        const isMe = parseInt(data.user_id) === currentUserId; // <-- Bulletproof matching check
         const align = isMe ? 'flex-row-reverse' : '';
         const bg = isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none';
         const txtAlign = isMe ? 'text-right' : '';
@@ -84,7 +75,7 @@
         const markup = `
             <div class="flex items-start gap-2.5 ${align}">
                 <div class="flex flex-col max-w-[70%]">
-                    <span class="text-[10px] text-slate-400 mb-0.5 ${txtAlign}">${data.user}</span>
+                    <span class="text-[10px] text-slate-400 mb-0.5 ${txtAlign}">${data.user_name}</span>
                     <p class="p-3 text-sm rounded-2xl shadow-xs ${bg}">${data.msg}</p>
                 </div>
             </div>`;
@@ -98,4 +89,4 @@
         container.scrollTop = container.scrollHeight;
     });
 </script>
-{% endblock %}  
+{% endblock %}

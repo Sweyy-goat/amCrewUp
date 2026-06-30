@@ -16,13 +16,13 @@ def handle_message(data):
     msg_content = data['msg'].strip()
     
     if msg_content:
-        # Save real-time messages directly to database instance
         new_msg = Message(event_id=int(room), user_id=current_user.id, content=msg_content)
         db.session.add(new_msg)
         db.session.commit()
         
         emit('message', {
-            'user': current_user.name,
+            'user_id': current_user.id,    # <-- Pass ID for layout matching
+            'user_name': current_user.name, # <-- Pass Name for display
             'msg': msg_content,
             'pic': current_user.profile_pic
         }, room=room)

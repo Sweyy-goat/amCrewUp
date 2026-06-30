@@ -15,7 +15,7 @@
     <form action="/create-event" method="POST" class="space-y-4">
         <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
-            <input type="text" name="title" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+            <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
         </div>
         <div class="grid grid-cols-2 gap-4">
             <div>
@@ -30,17 +30,17 @@
             </div>
             <div id="custom-input" class="hidden">
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
-                <input type="text" name="custom_details" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
-                <input type="number" name="total_cost" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
-                <input type="number" name="member_limit" min="2" max="50" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
@@ -58,7 +58,7 @@
             </div>
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
-                <input type="text" name="location" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                <input type="text" name="location" required placeholder="e.g., Main Gate / Ground" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
         </div>
         <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
@@ -68,30 +68,45 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for event in events %}
     <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
+        
         <div class="absolute top-0 left-0 right-0 h-1 bg-slate-100">
             <div class="h-full bg-indigo-600 transition-all duration-1000" id="progress-bar-{{ event.id }}"></div>
         </div>
+        
         <div class="mt-2">
-            <div class="flex justify-between items-start">
-                <span class="text-xs uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded">
+            <div class="flex justify-between items-start gap-2">
+                <span class="text-xs uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded whitespace-nowrap">
                     {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
                 </span>
+                
                 <span id="countdown-badge-{{ event.id }}" 
                       data-deadline="{{ event.event_time.isoformat() }}" 
                       data-joined="{{ 'true' if current_user in event.members else 'false' }}"
-                      class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                      class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap">
                     Calculating...
                 </span>
             </div>
-            <h2 class="text-lg font-bold text-slate-900 mt-3">{{ event.title }}</h2>
+            
+            <h2 class="text-lg font-bold text-slate-900 mt-3 truncate">{{ event.title }}</h2>
+            
+            {% if event.total_cost > 0 %}
+            <div class="mt-3 bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex justify-between items-center">
+                <span class="text-xs text-emerald-800 font-medium">Current Split:</span>
+                <span class="text-xs font-bold text-emerald-700">
+                    ₹{{ (event.total_cost / (event.members.count() if event.members.count() > 0 else 1))|round(1) }} / head
+                </span>
+            </div>
+            {% endif %}
+            
             <div class="mt-4 text-xs space-y-2 text-slate-500">
-                <p>📍 {{ event.location }}</p>
+                <p class="truncate">📍 {{ event.location }}</p>
                 <p>⏰ {{ event.event_time.strftime('%b %d, %I:%M %p') }}</p>
-                <p>👥 Joined: {{ event.members.count() }} / {{ event.member_limit }} positions</p>
+                <p>👥 Joined: <span class="font-semibold text-slate-800">{{ event.members.count() }}</span> / {{ event.member_limit }} slots filled</p>
             </div>
         </div>
+        
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400">Host: {{ event.host.name }}</span>
+            <span class="text-xs text-slate-400 truncate max-w-[120px]">Host: {{ event.host.name }}</span>
             <div id="action-wrapper-{{ event.id }}">
                 {% if current_user in event.members %}
                 <a href="/chat/{{ event.id }}" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition">Open Chat Room</a>
@@ -117,18 +132,18 @@
                 let timeDifference = deadline - now;
                 
                 if (timeDifference <= 0) {
-                    const gracePeriod = 2 * 60 * 1000;
+                    const gracePeriod = 2 * 60 * 1000; // 2 minutes in milliseconds
                     const timeSinceExpired = now - deadline;
 
                     if (isJoined && timeSinceExpired < gracePeriod) {
                         const remainingGrace = gracePeriod - timeSinceExpired;
                         const secondsLeft = Math.floor((remainingGrace / 1000) % 60);
                         badge.innerText = `⚠️ Closed (${secondsLeft}s left)`;
-                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600";
+                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 whitespace-nowrap";
                         return;
                     } else {
                         badge.innerText = "⌛ Expired";
-                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500";
+                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 whitespace-nowrap";
                         const joinBtn = document.getElementById(`join-btn-${eventId}`);
                         if (joinBtn) {
                             joinBtn.className = "px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-medium cursor-not-allowed pointer-events-none";
@@ -148,10 +163,10 @@
                 timeString += `${minutes}m ${seconds}s`;
                 badge.innerText = `⏱️ ${timeString}`;
                 
-                if (totalSeconds < 300) {
-                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator";
+                if (totalSeconds < 300) { // Under 5 minutes remaining
+                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator whitespace-nowrap";
                 } else {
-                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600";
+                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 whitespace-nowrap";
                 }
             });
         }
