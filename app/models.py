@@ -15,12 +15,13 @@ user_events = db.Table('user_events',
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False) # <-- Add this explicit line
     roll_number = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False) # In production, use werkzeug.security to hash
+    password = db.Column(db.String(200), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(20), nullable=False)
     profile_pic = db.Column(db.String(200), default='default.jpg')
-    interests = db.Column(db.String(500), nullable=False) # Comma-separated tags (e.g., "coding,going out,sports")
+    interests = db.Column(db.String(500), nullable=False)
     
     events_joined = db.relationship('Event', secondary=user_events, backref=db.backref('members', lazy='dynamic'))
 

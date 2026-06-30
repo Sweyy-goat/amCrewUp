@@ -9,8 +9,7 @@ def handle_join(data):
     room = str(data['event_id'])
     join_room(room)
     # Modern Feature: System notifies room when a classmate hops on
-    emit('status', {'msg': f"{current_user.roll_number} joined the plan."}, room=room)
-
+    emit('status', {'msg': f"{current_user.name} joined the plan."}, room=room)
 @socketio.on('text')
 def handle_message(data):
     room = str(data['event_id'])
@@ -23,7 +22,7 @@ def handle_message(data):
         db.session.commit()
         
         emit('message', {
-            'user': current_user.roll_number,
+            'user': current_user.name,
             'msg': msg_content,
             'pic': current_user.profile_pic
         }, room=room)

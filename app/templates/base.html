@@ -14,7 +14,7 @@
         <a href="/dashboard" class="text-xl font-bold tracking-tight text-slate-900">Campus<span class="text-indigo-600">Connect.</span></a>
         <div class="flex items-center gap-4">
             <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="w-8 h-8 rounded-full border border-slate-300 object-cover">
-            <span class="text-sm font-medium text-slate-600">{{ current_user.roll_number }}</span>
+            <span class="text-sm font-medium text-slate-600">{{ current_user.name }}</span>
             <a href="/logout" class="text-xs font-semibold px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition">Logout</a>
         </div>
     </nav>

@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import User, Event, Message
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 from flask import current_app as app
@@ -22,6 +22,7 @@ def auth_login():
         
         if action == 'signup':
             email = request.form.get('email')
+            name = request.form.get('name')
             roll_number = request.form.get('roll_number')
             password = request.form.get('password')
             age = request.form.get('age')
@@ -35,7 +36,7 @@ def auth_login():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
             user = User(
-                email=email, roll_number=roll_number, password=password, 
+                email=email,name=name, roll_number=roll_number, password=password, 
                 age=age, gender=gender, profile_pic=filename, 
                 interests=",".join(interests)
             )
@@ -57,29 +58,45 @@ def auth_login():
 
 @app.route('/dashboard')
 @login_required
+
+@app.route('/dashboard')
+@login_required
 def dashboard():
     all_events = Event.query.all()
+    now = datetime.utcnow()
     
-    # Smart Sorting Algorithm based on matching interest items
+    # Smart Sorting & Time-Expiry Filter
     user_interest_list = current_user.interests.split(',')
-    
-    def calculate_score(event):
-        # Filter based on gender preference right out of the feed
-        if event.gender_preference != 'All' and event.gender_preference != current_user.gender:
-            return -1 
+    filtered_events = []
+
+    for event in all_events:
+        # Check if the current user is a member
+        is_member = current_user in event.members
         
-        # Exact category match weights highest
+        # Determine visibility threshold based on membership status
+        visibility_deadline = event.event_time + timedelta(minutes=2) if is_member else event.event_time
+        
+        # If the event has crossed its allowed time threshold, hide it completely
+        if now > visibility_deadline:
+            continue
+
+        # Check gender preference constraints
+        if event.gender_preference != 'All' and event.gender_preference != current_user.gender:
+            continue
+
+        # Calculate a personalized matching score for sorting
         score = 0
         if event.category in user_interest_list or (event.category == 'other' and event.custom_details):
             score += 10
-        return score
+        
+        # Attach the score dynamically to the object for sorting
+        event.search_score = score
+        filtered_events.append(event)
 
-    # Filter out mismatching genders and sort descending by personalized score
-    filtered_events = [e for e in all_events if calculate_score(e) >= 0]
-    sorted_events = sorted(filtered_events, key=calculate_score, reverse=True)
+    # Sort descending: highest match score first
+    sorted_events = sorted(filtered_events, key=lambda e: e.search_score, reverse=True)
 
-    return render_template('dashboard.html', events=sorted_events)
-
+    return render_template('dashboard.html', events=sorted_events, now=now)
 @app.route('/create-event', methods=['POST'])
 @login_required
 def create_event():

@@ -66,35 +66,119 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for event in events %}
-    <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between">
-        <div>
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
+        
+        <div class="absolute top-0 left-0 right-0 h-1 bg-slate-100">
+            <div class="h-full bg-indigo-600 transition-all duration-1000" id="progress-bar-{{ event.id }}"></div>
+        </div>
+
+        <div class="mt-2">
             <div class="flex justify-between items-start">
                 <span class="text-xs uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded">
                     {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
                 </span>
-                {% if event.total_cost > 0 %}
-                <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                    Est. Splitting: ₹{{ (event.total_cost / event.member_limit)|round(1) }} each
+                
+                <span id="countdown-badge-{{ event.id }}" 
+                      data-deadline="{{ event.event_time.isoformat() }}" 
+                      data-joined="{{ 'true' if current_user in event.members else 'false' }}"
+                      class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    Calculating...
                 </span>
-                {% endif %}
             </div>
+            
             <h2 class="text-lg font-bold text-slate-900 mt-3">{{ event.title }}</h2>
+            
             <div class="mt-4 text-xs space-y-2 text-slate-500">
                 <p>📍 {{ event.location }}</p>
                 <p>⏰ {{ event.event_time.strftime('%b %d, %I:%M %p') }}</p>
-                <p>👥 Joined: {{ event.members.count() }} / {{ event.member_limit }} positions occupied</p>
+                <p>👥 Joined: {{ event.members.count() }} / {{ event.member_limit }} positions</p>
             </div>
         </div>
+
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400">Host: {{ event.host.roll_number }}</span>
-            {% if current_user in event.members %}
-            <a href="/chat/{{ event.id }}" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition">Open Chat Room</a>
-            {% else %}
-            <a href="/join-event/{{ event.id }}" class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition">Join Group</a>
-            {% endif %}
+            <span class="text-xs text-slate-400">Host: {{ event.host.name }}</span>
+            <div id="action-wrapper-{{ event.id }}">
+                {% if current_user in event.members %}
+                <a href="/chat/{{ event.id }}" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition">Open Chat Room</a>
+                {% else %}
+                <a href="/join-event/{{ event.id }}" id="join-btn-{{ event.id }}" class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition">Join Group</a>
+                {% endif %}
+            </div>
         </div>
     </div>
+    {% endfor %}
+</div>
+
+<script>
+    function initializeCampusCountdowns() {
+        const badges = document.querySelectorAll('[id^="countdown-badge-"]');
+        
+        function tick() {
+            const now = new Date();
+
+            badges.forEach(badge => {
+                const eventId = badge.id.split('-').pop();
+                const deadline = new Date(badge.getAttribute('data-deadline') + 'Z'); // Appends 'Z' to treat string accurately as UTC
+                const isJoined = badge.getAttribute('data-joined') === 'true';
+                
+                let timeDifference = deadline - now;
+                
+                // If the deadline has passed, check if they get the extra 2 minutes grace period
+                if (timeDifference <= 0) {
+                    const gracePeriod = 2 * 60 * 1000; // 2 minutes in ms
+                    const timeSinceExpired = now - deadline;
+
+                    if (isJoined && timeSinceExpired < gracePeriod) {
+                        const remainingGrace = gracePeriod - timeSinceExpired;
+                        const secondsLeft = Math.floor((remainingGrace / 1000) % 60);
+                        badge.innerText = `⚠️ Closed (${secondsLeft}s left)`;
+                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600";
+                        return;
+                    } else {
+                        // Completely expired threshold met
+                        badge.innerText = "⌛ Expired";
+                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500";
+                        
+                        // Disable the join button immediately in the client layer
+                        const joinBtn = document.getElementById(`join-btn-${eventId}`);
+                        if (joinBtn) {
+                            joinBtn.className = "px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-medium cursor-not-allowed pointer-events-none";
+                            joinBtn.innerText = "Closed";
+                        }
+                        return;
+                    }
+                }
+
+                // Standard ticking math configuration
+                const totalSeconds = Math.floor(timeDifference / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+
+                let timeString = "";
+                if (hours > 0) timeString += `${hours}h `;
+                timeString += `${minutes}m ${seconds}s`;
+
+                badge.innerText = `⏱️ ${timeString}`;
+                
+                // Urgency context color changes
+                if (totalSeconds < 300) { // Under 5 minutes left
+                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator";
+                } else {
+                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600";
+                }
+            });
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    }
+
+    // Fire engine on document ready load
+    document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
+</script>
     {% endfor %}
 </div>
 {% endblock %}
