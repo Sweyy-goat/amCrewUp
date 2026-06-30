@@ -26,6 +26,7 @@ def create_app():
 
     with app.app_context():
         from . import routes, models
+        from . import events
         db.create_all() # Automatically creates MySQL tables if they don't exist in Railway
 
     return app

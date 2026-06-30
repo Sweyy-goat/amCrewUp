@@ -33,21 +33,36 @@
 </div>
 
 <script src="{{ url_for('static', filename='../socket.io/socket.io.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-   // Update this line inside the <script> block of chat.html
-const socket = io({
-    transports: ['websocket', 'polling']
-});
+    // Automatically capture your live deployment's domain structure
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socketUrl = protocol + window.location.host;
+
+    // Explicitly configure production handshake parameters
+    const socket = io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        upgrade: true,
+        rememberUpgrade: true
+    });
+
     const eventId = "{{ event.id }}";
     const currentRoll = "{{ current_user.roll_number }}";
 
-    socket.emit('join', { event_id: eventId });
+    // Debugging verification log visible in browser console (Inspect Element)
+    socket.on('connect', () => {
+        console.log('Successfully synchronized with campus chat engine via WebSocket.');
+        socket.emit('join', { event_id: eventId });
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('WebSocket Handshake Failed:', error);
+    });
 
     const sendBtn = document.getElementById('send-btn');
     const input = document.getElementById('user-input');
     const container = document.getElementById('msg-container');
 
-    // Automatically scroll to bottom on entry load
     container.scrollTop = container.scrollHeight;
 
     function dispatchMessage() {
