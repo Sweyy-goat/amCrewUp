@@ -66,10 +66,13 @@
     height: 100dvh;
     width: 100vw;
     max-width: 560px;
-    margin: 0 auto;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--sf-bg);
     box-shadow: 0 0 60px rgba(0,0,0,0.06);
+    z-index: 9999;
   }
 
   .app-header {
