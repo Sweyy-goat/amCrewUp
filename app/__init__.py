@@ -1,8 +1,13 @@
+import eventlet
+eventlet.monkey_patch()  # <-- Add this to fix the RLock greening warning
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from config import Config
+
+# ... rest of your existing app/__init__.py code remains exactly the same
 
 db = SQLAlchemy()
 login_manager = LoginManager()
