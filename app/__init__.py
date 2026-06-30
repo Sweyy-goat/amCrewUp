@@ -12,8 +12,10 @@ from config import Config
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth_login'
-socketio = SocketIO(cors_allowed_origins="*") # Crucial for Railway routing cross-origins
+# Inside app/__init__.py
 
+# Update this line to include async_mode explicitly
+socketio = SocketIO(cors_allowed_origins="*", async_mode='eventlet')
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
