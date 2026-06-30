@@ -1,10 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
 <style>
   *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    /* Disables annoying gray selection flash on tap */
-    -webkit-tap-highlight-color: transparent; 
+    -webkit-tap-highlight-color: transparent;
   }
 
   :root {
@@ -12,31 +15,32 @@
     --sf-ink-secondary: #8e8e93;
     --sf-ink-tertiary: #c7c7cc;
     --sf-bg: #ffffff;
-    --sf-surface-blur: rgba(255, 255, 255, 0.85);
-    
-    --sf-bubble-me: #34c759; /* Apple System Green for active coordination */
+    --sf-surface-blur: rgba(255, 255, 255, 0.82);
+
+    --sf-bubble-me: #34c759;
     --sf-bubble-me-text: #ffffff;
-    --sf-bubble-them: #e5e5ea;
+    --sf-bubble-them: #e9e9eb;
     --sf-bubble-them-text: #000000;
-    
-    --sf-border: rgba(0, 0, 0, 0.1);
+
+    --sf-border: rgba(0, 0, 0, 0.08);
     --sf-accent: #0071e3;
     --apple-ease: cubic-bezier(0.25, 1, 0.5, 1);
+    --apple-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
       --sf-ink: #ffffff;
-      --sf-ink-secondary: #8e8e93;
+      --sf-ink-secondary: #98989d;
       --sf-ink-tertiary: #48484a;
       --sf-bg: #000000;
-      --sf-surface-blur: rgba(28, 28, 30, 0.85);
-      
+      --sf-surface-blur: rgba(20, 20, 22, 0.82);
+
       --sf-bubble-me: #30d158;
-      --sf-bubble-them: #252528;
+      --sf-bubble-them: #242426;
       --sf-bubble-them-text: #ffffff;
-      
-      --sf-border: rgba(255, 255, 255, 0.12);
+
+      --sf-border: rgba(255, 255, 255, 0.1);
     }
   }
 
@@ -44,7 +48,8 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    position: fixed; /* Prevents elastic scroll bouncing of the body on iOS */
+    position: fixed;
+    overscroll-behavior: none;
   }
 
   body {
@@ -54,35 +59,43 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Full Screen App Shell Container */
+  /* This screen is mobile-only by design — cap the shell so it never stretches into a desktop chat-app layout */
   .app-shell {
     display: flex;
     flex-direction: column;
-    height: 100dvh; /* Dynamic viewport height to account for mobile Safari/Chrome bars */
+    height: 100dvh;
     width: 100vw;
+    max-width: 560px;
+    margin: 0 auto;
     position: relative;
+    background: var(--sf-bg);
+    box-shadow: 0 0 60px rgba(0,0,0,0.06);
   }
 
-  /* Floating Sticky Header (iOS Style Navigation Bar) */
   .app-header {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 64px;
+    padding-top: env(safe-area-inset-top);
     background: var(--sf-surface-blur);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 0.5px solid var(--sf-border);
+    z-index: 100;
+  }
+
+  .app-header-inner {
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
-    z-index: 100;
+    padding: 0 14px;
   }
 
   .header-meta {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
   }
 
   .avatar-ring {
@@ -93,7 +106,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
   }
+  .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
   .avatar-ring span {
     font-size: 11px;
     font-weight: 700;
@@ -101,11 +117,16 @@
     letter-spacing: -0.2px;
   }
 
+  .header-text { min-width: 0; }
+
   .title-main {
     font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.3px;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .title-sub {
@@ -114,15 +135,20 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    margin-top: 1px;
   }
 
-  /* Pulse indicator for live streaming status */
   .pulse-dot {
     width: 5px;
     height: 5px;
     background: #34c759;
     border-radius: 50%;
     display: inline-block;
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
   }
 
   .exit-action {
@@ -130,18 +156,21 @@
     color: var(--sf-accent);
     text-decoration: none;
     font-weight: 400;
-    padding: 8px; /* Safe micro tap target */
+    padding: 8px;
+    margin-right: -8px;
+    transition: opacity 0.15s var(--apple-ease);
   }
+  .exit-action:active { opacity: 0.4; }
 
-  /* Message Stream Layer (Takes up core space) */
   .msg-stream {
     flex: 1;
     overflow-y: auto;
-    padding: 80px 14px 84px; /* Padding keeps text clear of floating top/bottom sheets */
+    padding: calc(56px + env(safe-area-inset-top) + 16px) 14px 16px;
     display: flex;
     flex-direction: column;
     gap: 3px;
-    -webkit-overflow-scrolling: touch; /* Momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
   .status-pill {
@@ -150,30 +179,29 @@
     font-weight: 500;
     color: var(--sf-ink-secondary);
     background: var(--sf-border);
-    padding: 3px 10px;
+    padding: 4px 11px;
     border-radius: 12px;
-    margin: 10px 0;
+    margin: 12px 0;
   }
 
   .chat-row {
     display: flex;
     flex-direction: column;
-    max-width: 75%;
+    max-width: 78%;
     position: relative;
-    animation: iosSpring 0.38s var(--apple-ease) both;
+    animation: iosSpring 0.4s var(--apple-ease) both;
     will-change: transform, opacity;
   }
   .chat-row.me { align-self: flex-end; align-items: flex-end; }
   .chat-row.them { align-self: flex-start; align-items: flex-start; }
 
-  /* Message spacing structure constraints */
-  .chat-row.me + .chat-row.me, 
+  .chat-row.me + .chat-row.me,
   .chat-row.them + .chat-row.them { margin-top: -1px; }
-  .chat-row.me + .chat-row.them, 
+  .chat-row.me + .chat-row.them,
   .chat-row.them + .chat-row.me { margin-top: 10px; }
 
   @keyframes iosSpring {
-    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    from { opacity: 0; transform: translateY(14px) scale(0.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
@@ -181,16 +209,17 @@
     font-size: 11px;
     font-weight: 500;
     color: var(--sf-ink-secondary);
-    margin-left: 10px;
-    margin-bottom: 2px;
+    margin-left: 12px;
+    margin-bottom: 3px;
   }
   .chat-row.them + .chat-row.them .sender-label { display: none; }
 
   .bubble {
-    padding: 10px 14px;
-    font-size: 15px;
-    line-height: 1.35;
+    padding: 9px 14px;
+    font-size: 15.5px;
+    line-height: 1.36;
     letter-spacing: -0.2px;
+    word-break: break-word;
   }
 
   .me .bubble {
@@ -207,15 +236,44 @@
   }
   .chat-row.them + .chat-row.them .bubble { border-radius: 4px 18px 18px 4px; }
 
-  /* Bottom Input Bar Docked Container */
+  .msg-meta {
+    font-size: 10px;
+    color: var(--sf-ink-tertiary);
+    margin-top: 3px;
+    padding: 0 4px;
+  }
+
+  /* Typing indicator — three dots, true iMessage timing */
+  .typing-row { animation: iosSpring 0.3s var(--apple-ease) both; }
+  .typing-bubble {
+    background: var(--sf-bubble-them);
+    border-radius: 18px 18px 18px 4px;
+    padding: 11px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .typing-bubble span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sf-ink-tertiary);
+    animation: typingBounce 1.1s ease-in-out infinite;
+  }
+  .typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-bubble span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
   .bottom-dock {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     background: var(--sf-surface-blur);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-top: 0.5px solid var(--sf-border);
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); /* Dynamic home-indicator buffer for iPhone */
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     z-index: 100;
   }
 
@@ -229,19 +287,18 @@
     width: 100%;
     height: 38px;
     padding: 0 40px 0 14px;
-    font-size: 15px;
+    font-size: 16px; /* 16px avoids iOS auto-zoom-on-focus */
     font-family: inherit;
     background: rgba(120, 120, 128, 0.12);
     border: none;
     border-radius: 19px;
     color: var(--sf-ink);
     outline: none;
+    transition: background-color 0.2s var(--apple-ease);
   }
-  .mobile-input::placeholder {
-    color: var(--sf-ink-secondary);
-  }
+  .mobile-input:focus { background: rgba(120, 120, 128, 0.18); }
+  .mobile-input::placeholder { color: var(--sf-ink-secondary); }
 
-  /* Core native layout circle send tracking button */
   .mobile-send {
     position: absolute;
     right: 5px;
@@ -253,16 +310,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: opacity 0.2s var(--apple-ease), transform 0.15s var(--apple-snap);
     opacity: 0.2;
     pointer-events: none;
+    transform: scale(0.85);
   }
 
   .mobile-input:not(:placeholder-shown) + .mobile-send {
     opacity: 1;
     pointer-events: auto;
+    transform: scale(1);
   }
-  .mobile-send:active { transform: scale(0.9); }
+  .mobile-send:active { transform: scale(0.85); }
 
   .mobile-send svg {
     width: 12px;
@@ -275,52 +334,57 @@
     transform: rotate(45deg);
     margin-left: -1px; margin-top: 1px;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 
 <div class="app-shell">
   <header class="app-header">
-    <div class="header-meta">
-      <div class="avatar-ring"><span>CSE</span></div>
-      <div>
-        <h1 class="title-main">Turf Booking</h1>
-        <div class="title-sub"><span class="pulse-dot"></span> 8 active members</div>
+    <div class="app-header-inner">
+      <div class="header-meta">
+        <div class="avatar-ring">
+          {% if event.cover_image_url %}
+            <img src="{{ event.cover_image_url }}" alt="">
+          {% else %}
+            <span>{{ event.initials or event.name[:2]|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="header-text">
+          <h1 class="title-main">{{ event.name }}</h1>
+          <div class="title-sub">
+            <span class="pulse-dot"></span> {{ event.active_member_count }} active member{{ 's' if event.active_member_count != 1 else '' }}
+          </div>
+        </div>
       </div>
+      <a href="{{ url_for('event_leave', event_id=event.id) }}" class="exit-action">Exit</a>
     </div>
-    <a href="#" class="exit-action">Exit</a>
   </header>
 
   <main class="msg-stream" id="msgStream">
-    <div class="status-pill">You joined the match chat</div>
-    
-    <div class="chat-row them">
-      <span class="sender-label">Arjun K.</span>
-      <div class="bubble">Hey everyone, who's confirmed for 6PM? Need at least 8 to book the full turf.</div>
-    </div>
-    
-    <div class="chat-row them">
-      <span class="sender-label">Priya M.</span>
-      <div class="bubble">I'm in! Can we carpool from campus gate? Asking for 3 seats.</div>
-    </div>
-    
-    <div class="chat-row me">
-      <div class="bubble">Confirmed. I can take 2 more in my car, leaving at 5:30 from Block C.</div>
-    </div>
-    
-    <div class="chat-row them">
-      <span class="sender-label">Rohith S.</span>
-      <div class="bubble">Count me in for the ride. Also — split the booking cost equally among confirmed members?</div>
-    </div>
-    
-    <div class="chat-row me">
-      <div class="bubble">Yeah equal split makes sense. I'll collect once we hit 8 confirmed.</div>
-    </div>
-    
-    <div class="status-pill">Arjun K. joined the event</div>
+    <div class="status-pill">You joined {{ event.name }}</div>
+
+    {% for message in messages %}
+      {% if message.is_system %}
+        <div class="status-pill">{{ message.body }}</div>
+      {% else %}
+        <div class="chat-row {{ 'me' if message.sender_id == current_user.id else 'them' }}">
+          {% if message.sender_id != current_user.id %}
+            <span class="sender-label">{{ message.sender_display_name }}</span>
+          {% endif %}
+          <div class="bubble">{{ message.body }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
   </main>
 
   <footer class="bottom-dock">
     <div class="input-field-frame">
-      <input class="mobile-input" id="mInput" type="text" placeholder="iMessage" autocomplete="off">
+      <input class="mobile-input" id="mInput" type="text" placeholder="iMessage" autocomplete="off" enterkeyhint="send">
       <button class="mobile-send" id="mSend" aria-label="Send">
         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -332,23 +396,34 @@
 const stream = document.getElementById('msgStream');
 const input = document.getElementById('mInput');
 const btn = document.getElementById('mSend');
+const eventId = "{{ event.id }}";
 
-// Automated scroll stabilization focus
 stream.scrollTop = stream.scrollHeight;
 
-function sendMsg() {
-  const txt = input.value.trim();
-  if(!txt) return;
-  
-  const row = document.createElement('div');
-  row.className = 'chat-row me';
-  row.innerHTML = `<div class="bubble">${txt}</div>`;
-  
-  stream.appendChild(row);
-  input.value = '';
+function appendRow(html) {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = html.trim();
+  stream.appendChild(wrap.firstChild);
   stream.scrollTop = stream.scrollHeight;
 }
 
+function sendMsg() {
+  const txt = input.value.trim();
+  if (!txt) return;
+
+  appendRow(`<div class="chat-row me"><div class="bubble"></div></div>`);
+  stream.lastElementChild.querySelector('.bubble').textContent = txt;
+  input.value = '';
+
+  // POST to the backend; the real message list is the source of truth on reload
+  fetch(`/events/${eventId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body: txt })
+  }).catch(() => {});
+}
+
 btn.addEventListener('click', sendMsg);
-input.addEventListener('keydown', e => { if(e.key === 'Enter') sendMsg(); });
+input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
 </script>
+{% endblock %}
