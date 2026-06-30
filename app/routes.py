@@ -6,10 +6,6 @@ from .models import User, Event, Message
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
-@request.blueprint
-def init_routes(app):
-    # This architecture uses plain app routes for clean layout
-    pass
 
 from flask import current_app as app
 
