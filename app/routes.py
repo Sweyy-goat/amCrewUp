@@ -20,23 +20,32 @@ def auth_login():
     if request.method == 'POST':
         action = request.form.get('action')
         
+        # 1. NEW USER REGISTRATION ROUTINE (Asks for Name)
         if action == 'signup':
             email = request.form.get('email')
-            name = request.form.get('name')
+            name = request.form.get('name')  # Captured strictly here during account creation
             roll_number = request.form.get('roll_number')
             password = request.form.get('password')
             age = request.form.get('age')
             gender = request.form.get('gender')
-            interests = request.form.getlist('interests') # returns list from checkboxes
+            interests = request.form.getlist('interests')
             
+            # Check if user already exists
+            existing_user = User.query.filter((User.email == email) | (User.roll_number == roll_number)).first()
+            if existing_user:
+                flash('An account with this Email or Roll Number already exists.')
+                return redirect(url_for('auth_login'))
+
+            # Handle Profile Picture Upload
             file = request.files.get('profile_pic')
             filename = 'default.jpg'
             if file and file.filename != '':
                 filename = secure_filename(f"{roll_number}_{file.filename}")
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
+            # Instantiate the new student profile with their Name
             user = User(
-                email=email,name=name, roll_number=roll_number, password=password, 
+                email=email, name=name, roll_number=roll_number, password=password, 
                 age=age, gender=gender, profile_pic=filename, 
                 interests=",".join(interests)
             )
@@ -45,17 +54,20 @@ def auth_login():
             login_user(user)
             return redirect(url_for('dashboard'))
             
+        # 2. EXISTING USER SIGN IN ROUTINE (Does NOT ask for Name)
         elif action == 'login':
             email = request.form.get('email')
             password = request.form.get('password')
+            
+            # Match strictly against credentials
             user = User.query.filter_by(email=email, password=password).first()
             if user:
                 login_user(user)
                 return redirect(url_for('dashboard'))
-            flash('Invalid credentials')
+            
+            flash('Invalid email or password credentials.')
             
     return render_template('login.html')
-
 
 @app.route('/dashboard')
 @login_required
