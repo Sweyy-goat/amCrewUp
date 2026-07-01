@@ -1,248 +1,866 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+
+<style>
+  :root {
+    --bg: #07070D;
+    --surface: #0F0F1A;
+    --surface-2: #161625;
+    --surface-3: #1C1C30;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(139,92,246,0.35);
+    --violet: #8B5CF6;
+    --violet-light: #A78BFA;
+    --violet-dim: rgba(139,92,246,0.15);
+    --violet-glow: rgba(139,92,246,0.08);
+    --text-primary: #F0EEFF;
+    --text-secondary: rgba(240,238,255,0.5);
+    --text-tertiary: rgba(240,238,255,0.28);
+    --green: #34D399;
+    --green-dim: rgba(52,211,153,0.12);
+    --rose: #F87171;
+    --rose-dim: rgba(248,113,113,0.12);
+    --amber: #FBBF24;
+    --amber-dim: rgba(251,191,36,0.12);
+    --radius-card: 20px;
+    --radius-sm: 10px;
+    --radius-pill: 100px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    padding: 32px 0 20px;
+    position: relative;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin: 0;
+    letter-spacing: 0.1px;
+  }
+
+  /* ── Event cards ── */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    padding-bottom: 120px;
+  }
+
+  .event-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    animation: cardIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+
+  .event-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.06) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    border-radius: var(--radius-card);
+  }
+
+  .event-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 0 0 1px rgba(139,92,246,0.12), 0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(139,92,246,0.04);
+    transform: translateY(-3px);
+  }
+  .event-card:hover::before { opacity: 1; }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+
+  /* Progress bar */
+  .card-progress {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--surface-3);
+    border-radius: 2px 2px 0 0;
+    overflow: hidden;
+  }
+  .card-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: inherit;
+    transition: width 1s linear;
+  }
+
+  /* Category + countdown row */
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .cat-pill {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .countdown-badge {
+    font-size: 11px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    transition: background 0.3s, color 0.3s;
+  }
+  .countdown-badge.urgent {
+    background: var(--rose-dim);
+    color: var(--rose);
+    border-color: rgba(248,113,113,0.2);
+    animation: urgentPulse 1s ease-in-out infinite;
+  }
+  .countdown-badge.expired {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-tertiary);
+    border-color: var(--border);
+  }
+  .countdown-badge.grace {
+    background: var(--amber-dim);
+    color: var(--amber);
+    border-color: rgba(251,191,36,0.2);
+  }
+
+  @keyframes urgentPulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Card title */
+  .card-title {
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin: 14px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Cost split */
+  .cost-chip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--green-dim);
+    border: 1px solid rgba(52,211,153,0.15);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    margin-top: 12px;
+  }
+  .cost-chip span:first-child {
+    font-size: 11px;
+    color: rgba(52,211,153,0.7);
+    font-weight: 500;
+  }
+  .cost-chip span:last-child {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Meta row */
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 0.1px;
+  }
+  .card-meta-item .icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .card-meta-item strong { color: var(--text-primary); font-weight: 600; }
+
+  /* Capacity bar */
+  .capacity-bar-wrap {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .capacity-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .capacity-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(.34,1.56,.64,1);
+  }
+  .capacity-label {
+    font-size: 10px;
+    font-family: 'SF Mono', monospace;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+
+  /* Card footer */
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .host-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  /* Action buttons */
+  .btn-join {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--violet-dim);
+    color: var(--violet-light);
+    border: 1px solid rgba(139,92,246,0.25);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .btn-join:hover {
+    background: rgba(139,92,246,0.22);
+    border-color: rgba(139,92,246,0.4);
+    transform: scale(1.03);
+  }
+  .btn-chat {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--violet);
+    color: #fff;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 0 20px rgba(139,92,246,0.3);
+  }
+  .btn-chat:hover {
+    background: var(--violet-light);
+    transform: scale(1.03);
+    box-shadow: 0 0 30px rgba(139,92,246,0.5);
+  }
+  .btn-closed {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-tertiary);
+    border: 1px solid var(--border);
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+  /* Staggered card delay */
+  {% for i in range(20) %}
+  .event-card:nth-child({{ i + 1 }}) { animation-delay: {{ i * 60 }}ms; }
+  {% endfor %}
+
+  /* ── Modals ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    animation: modalIn 0.35s cubic-bezier(.34,1.56,.64,1) both;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 18px; right: 18px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  .modal-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+  }
+  .modal-sub {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin: 0 0 22px;
+  }
+
+  /* Form elements */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-input::placeholder { color: var(--text-tertiary); }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--violet);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+  }
+  .form-select option { background: #1a1a2e; }
+
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .form-hidden { display: none; }
+
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    background: var(--violet);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 4px 24px rgba(139,92,246,0.35);
+  }
+  .btn-submit:hover {
+    background: var(--violet-light);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(139,92,246,0.5);
+  }
+  .btn-submit:active { transform: translateY(0); }
+
+  /* Profile modal */
+  .profile-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--violet);
+    box-shadow: 0 0 0 4px rgba(139,92,246,0.15);
+    display: block;
+    margin: 0 auto 14px;
+  }
+  .profile-name {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+  }
+  .roll-badge {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    font-family: 'SF Mono', monospace;
+    padding: 3px 10px;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border-radius: var(--radius-pill);
+    width: fit-content;
+    margin: 0 auto 20px;
+  }
+  .profile-meta {
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .profile-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+  .profile-meta-row span:first-child { color: var(--text-tertiary); }
+  .profile-meta-row span:last-child { color: var(--text-primary); font-weight: 500; }
+  .interests-label {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+  .interests-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .interest-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: var(--violet-dim);
+    color: var(--violet-light);
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(139,92,246,0.2);
+  }
+
+  /* Stats modal */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 15px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+  }
+  .stat-row span:first-child { font-size: 12px; color: var(--text-secondary); }
+  .stat-row span:last-child { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .stat-row.accent { background: var(--violet-dim); border-color: rgba(139,92,246,0.2); }
+  .stat-row.accent span:first-child { color: var(--violet-light); }
+  .stat-row.accent span:last-child { color: var(--violet-light); }
+
+  /* ── Dock ── */
+  .dock {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    width: calc(100% - 32px);
+    max-width: 360px;
+  }
+  .dock-inner {
+    background: rgba(15,15,26,0.85);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  }
+  .dock-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: rgba(240,238,255,0.5);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 12px;
+    transition: color 0.2s, background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+    text-decoration: none;
+  }
+  .dock-btn:hover { color: var(--text-primary); transform: translateY(-2px); }
+  .dock-btn svg { width: 20px; height: 20px; }
+  .dock-btn .dock-label { font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
+
+  .dock-fab {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--violet);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    margin-top: -24px;
+    box-shadow: 0 0 0 4px rgba(15,15,26,0.9), 0 4px 24px rgba(139,92,246,0.5);
+    transition: background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+    color: #fff;
+  }
+  .dock-fab:hover {
+    background: var(--violet-light);
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 0 0 4px rgba(15,15,26,0.9), 0 8px 36px rgba(139,92,246,0.7);
+  }
+  .dock-fab svg { width: 22px; height: 22px; }
+
+  /* Avatar in dock */
+  .dock-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(255,255,255,0.15);
+  }
+</style>
+
+<!-- ── Header ── -->
+<div class="page-header">
+  <h1>Discover Hangouts</h1>
+  <p>Curated for your interests · Live on campus</p>
+</div>
+
+<!-- ── Create Event Modal ── -->
+<div id="event-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('event-modal')">&times;</button>
+    <p class="modal-title">Host a Gathering</p>
+    <p class="modal-sub">Broadcast your plan to the campus network</p>
+    <form action="/create-event" method="POST">
+      <div class="form-group">
+        <label class="form-label">Event Title</label>
+        <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="form-input">
+      </div>
+      <div class="form-grid-2" style="margin-bottom:16px;">
+        <div>
+          <label class="form-label">Category</label>
+          <select name="category" id="category-select" class="form-select"
+            onchange="document.getElementById('custom-input').classList.toggle('form-hidden', this.value!='other')">
+            <option value="coding">💻 Coding</option>
+            <option value="going out">🍕 Going Out</option>
+            <option value="rides">🚗 Joined Rides</option>
+            <option value="sports">⚽ Turf / Sports</option>
+            <option value="other">✨ Custom</option>
+          </select>
+        </div>
+        <div id="custom-input" class="form-hidden">
+          <label class="form-label">Specify</label>
+          <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="form-input">
+        </div>
+      </div>
+      <div class="form-grid-3" style="margin-bottom:16px;">
+        <div>
+          <label class="form-label">Total Cost ₹</label>
+          <input type="number" name="total_cost" value="0" min="0" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Max Squad</label>
+          <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Gender</label>
+          <select name="gender_preference" class="form-select">
+            <option value="All">All</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid-2" style="margin-bottom:20px;">
+        <div>
+          <label class="form-label">Date & Time</label>
+          <input type="datetime-local" name="event_time" required class="form-input">
+        </div>
+        <div>
+          <label class="form-label">Location</label>
+          <input type="text" name="location" required placeholder="e.g., Main Gate" class="form-input">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Broadcast Plan →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── Profile Modal ── -->
+<div id="profile-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:400px;">
+    <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="profile-avatar">
+    <p class="profile-name">{{ current_user.name }}</p>
+    <span class="roll-badge">{{ current_user.roll_number }}</span>
+    <div class="profile-meta">
+      <div class="profile-meta-row">
+        <span>Email</span><span>{{ current_user.email }}</span>
+      </div>
+      <div class="profile-meta-row">
+        <span>Age / Gender</span><span>{{ current_user.age }} · {{ current_user.gender }}</span>
+      </div>
+      <div>
+        <p class="interests-label">Interests</p>
+        <div class="interests-wrap">
+          {% for interest in current_user.interests.split(',') %}
+          <span class="interest-tag"># {{ interest.strip() }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats Modal ── -->
+<div id="stats-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:380px;">
+    <button class="modal-close" onclick="closeModal('stats-modal')">&times;</button>
+    <p class="modal-title">Campus Network</p>
+    <p class="modal-sub">Live micro-metrics across the campus cluster</p>
+    <div class="stat-row">
+      <span>Active Broadcasts</span>
+      <span>{{ events|length }}</span>
+    </div>
+    <div class="stat-row accent">
+      <span>Your Matching Slots</span>
+      <span>
+        {% set count = namespace(value=0) %}
+        {% for e in events %}{% if e.search_score > 0 %}{% set count.value = count.value + 1 %}{% endif %}{% endfor %}
+        {{ count.value }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Event Cards ── -->
+<div class="events-grid">
+  {% for event in events %}
+  {% set member_count = event.members.count() %}
+  {% set capacity_pct = ((member_count / event.member_limit) * 100)|round(0)|int %}
+  <div class="event-card">
+
+    <div class="card-progress">
+      <div class="card-progress-fill" id="progress-bar-{{ event.id }}" style="width:0"></div>
+    </div>
+
     <div>
-        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Discover Hangouts</h1>
-        <p class="text-slate-500 text-sm mt-1">Personalized events curated based on your active preferences.</p>
+      <div class="card-top">
+        <span class="cat-pill">
+          {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
+        </span>
+        <span class="countdown-badge" id="countdown-badge-{{ event.id }}"
+          data-deadline="{{ event.event_time.isoformat() }}"
+          data-joined="{{ 'true' if current_user in event.members else 'false' }}">
+          —
+        </span>
+      </div>
+
+      <h2 class="card-title">{{ event.title }}</h2>
+
+      {% if event.total_cost > 0 %}
+      <div class="cost-chip">
+        <span>Split per head</span>
+        <span>₹{{ (event.total_cost / (member_count if member_count > 0 else 1))|round(1) }}</span>
+      </div>
+      {% endif %}
+
+      <div class="card-meta">
+        <div class="card-meta-item"><span class="icon">📍</span><span class="truncate">{{ event.location }}</span></div>
+        <div class="card-meta-item"><span class="icon">⏰</span><span>{{ event.event_time.strftime('%b %d · %I:%M %p') }}</span></div>
+        <div class="card-meta-item" style="flex-direction:column; align-items:flex-start; gap:6px;">
+          <span><strong>{{ member_count }}</strong> / {{ event.member_limit }} joined</span>
+          <div class="capacity-bar-wrap">
+            <div class="capacity-bar">
+              <div class="capacity-bar-fill" style="width:{{ capacity_pct }}%"></div>
+            </div>
+            <span class="capacity-label">{{ capacity_pct }}%</span>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="card-footer">
+      <span class="host-label">{{ event.host.name }}</span>
+      <div id="action-wrapper-{{ event.id }}">
+        {% if current_user in event.members %}
+        <a href="/chat/{{ event.id }}" class="btn-chat">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" /></svg>
+          Chat Room
+        </a>
+        {% else %}
+        <a href="/join-event/{{ event.id }}" id="join-btn-{{ event.id }}" class="btn-join">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="13" height="13"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" /></svg>
+          Join
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 
-<div id="event-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-xl shadow-2xl relative animate-fade-in">
-        <button onclick="document.getElementById('event-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
-        <h3 class="font-bold text-lg text-slate-900 mb-4">Host a New Gathering</h3>
-        <form action="/create-event" method="POST" class="space-y-4">
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
-                <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                    <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
-                        <option value="coding">💻 Coding</option>
-                        <option value="going out">🍕 Going Out</option>
-                        <option value="rides">🚗 Joined Rides</option>
-                        <option value="sports">⚽ Turf Booking / Sports</option>
-                        <option value="other">✨ Other Custom Event</option>
-                    </select>
-                </div>
-                <div id="custom-input" class="hidden">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
-                    <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
-                    <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
-                    <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
-                    <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
-                        <option value="All">Open to All</option>
-                        <option value="Male">Male Only</option>
-                        <option value="Female">Female Only</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Time & Date</label>
-                    <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
-                    <input type="text" name="location" required placeholder="e.g., Main Gate / Ground" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-            </div>
-            <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
-        </form>
-    </div>
-</div>
+<!-- ── Dock ── -->
+<div class="dock">
+  <div class="dock-inner">
+    <button class="dock-btn" onclick="openModal('profile-modal')">
+      <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="dock-avatar">
+      <span class="dock-label">Profile</span>
+    </button>
 
-<div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
-        <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
-        <div class="flex flex-col items-center text-center">
-            <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="w-20 h-20 rounded-full border-2 border-indigo-500 object-cover mb-3 shadow-xs">
-            <h3 class="font-bold text-xl text-slate-900">{{ current_user.name }}</h3>
-            <span class="text-xs font-mono px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md mt-1">{{ current_user.roll_number }}</span>
-            
-            <div class="w-full mt-6 space-y-3 text-left border-t border-slate-100 pt-4 text-sm">
-                <div class="flex justify-between"><span class="text-slate-500 font-medium">Email:</span> <span class="text-slate-800">{{ current_user.email }}</span></div>
-                <div class="flex justify-between"><span class="text-slate-500 font-medium">Age / Gender:</span> <span class="text-slate-800">{{ current_user.age }} / {{ current_user.gender }}</span></div>
-                <div>
-                    <span class="text-slate-500 font-medium block mb-1.5">Your Core Interests:</span>
-                    <div class="flex flex-wrap gap-1.5">
-                        {% for interest in current_user.interests.split(',') %}
-                        <span class="text-xs font-medium px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg"># {{ interest }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    <button class="dock-fab" onclick="openModal('event-modal')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    </button>
 
-<div id="stats-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
-        <button onclick="document.getElementById('stats-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
-        <h3 class="font-bold text-lg text-slate-900 mb-3">Campus Network Status</h3>
-        <p class="text-xs text-slate-500 mb-4">Live micro-metrics across the immediate college campus cluster.</p>
-        <div class="space-y-3">
-            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
-                <span class="text-xs text-slate-600 font-medium">Total Active Broadcasts</span>
-                <span class="text-sm font-bold text-slate-900">{{ events|length }}</span>
-            </div>
-            <div class="p-3 bg-indigo-50/60 rounded-xl flex justify-between items-center">
-                <span class="text-xs text-indigo-700 font-medium">Your Matching Sync Slots</span>
-                <span class="text-sm font-bold text-indigo-600">
-                    {% set count = namespace(value=0) %}
-                    {% for e in events %}{% if e.search_score > 0 %}{% set count.value = count.value + 1 %}{% endif %}{% endfor %}
-                    {{ count.value }}
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-28">
-    {% for event in events %}
-    <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
-        
-        <div class="absolute top-0 left-0 right-0 h-1 bg-slate-100">
-            <div class="h-full bg-indigo-600 transition-all duration-1000" id="progress-bar-{{ event.id }}"></div>
-        </div>
-        
-        <div class="mt-2">
-            <div class="flex justify-between items-start gap-2">
-                <span class="text-xs uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-600 rounded whitespace-nowrap">
-                    {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
-                </span>
-                
-                <span id="countdown-badge-{{ event.id }}" 
-                      data-deadline="{{ event.event_time.isoformat() }}" 
-                      data-joined="{{ 'true' if current_user in event.members else 'false' }}"
-                      class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap">
-                    Calculating...
-                </span>
-            </div>
-            
-            <h2 class="text-lg font-bold text-slate-900 mt-3 truncate">{{ event.title }}</h2>
-            
-            {% if event.total_cost > 0 %}
-            <div class="mt-3 bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex justify-between items-center">
-                <span class="text-xs text-emerald-800 font-medium">Current Split:</span>
-                <span class="text-xs font-bold text-emerald-700">
-                    ₹{{ (event.total_cost / (event.members.count() if event.members.count() > 0 else 1))|round(1) }} / head
-                </span>
-            </div>
-            {% endif %}
-            
-            <div class="mt-4 text-xs space-y-2 text-slate-500">
-                <p class="truncate">📍 {{ event.location }}</p>
-                <p>⏰ {{ event.event_time.strftime('%b %d, %I:%M %p') }}</p>
-                <p>👥 Joined: <span class="font-semibold text-slate-800">{{ event.members.count() }}</span> / {{ event.member_limit }} slots filled</p>
-            </div>
-        </div>
-        
-        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400 truncate max-w-[120px]">Host: {{ event.host.name }}</span>
-            <div id="action-wrapper-{{ event.id }}">
-                {% if current_user in event.members %}
-                <a href="/chat/{{ event.id }}" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-medium hover:bg-slate-800 transition">Open Chat Room</a>
-                {% else %}
-                <a href="/join-event/{{ event.id }}" id="join-btn-{{ event.id }}" class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-semibold hover:bg-indigo-100 transition">Join Group</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4">
-    <div class="bg-slate-900/90 backdrop-blur-md shadow-xl border border-white/10 rounded-2xl px-6 py-3 flex justify-between items-center text-white">
-        
-        <button onclick="document.getElementById('profile-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 opacity-75 hover:opacity-100 transition focus:outline-none">
-            <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="w-5 h-5 rounded-full object-cover border border-white/20">
-            <span class="text-[10px] font-medium tracking-tight">Profile</span>
-        </button>
-
-        <button onclick="document.getElementById('event-modal').classList.remove('hidden')" class="flex flex-col items-center justify-center bg-indigo-600 hover:bg-indigo-500 w-12 h-12 rounded-full -mt-6 border-4 border-slate-900 shadow-md transition focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-        </button>
-
-        <button onclick="document.getElementById('stats-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 opacity-75 hover:opacity-100 transition focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-            </svg>
-            <span class="text-[10px] font-medium tracking-tight">Insights</span>
-        </button>
-
-    </div>
+    <button class="dock-btn" onclick="openModal('stats-modal')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" /></svg>
+      <span class="dock-label">Insights</span>
+    </button>
+  </div>
 </div>
 
 <script>
-    function initializeCampusCountdowns() {
-        const badges = document.querySelectorAll('[id^="countdown-badge-"]');
-        
-        function tick() {
-            const now = new Date();
-            badges.forEach(badge => {
-                const eventId = badge.id.split('-').pop();
-                const deadline = new Date(badge.getAttribute('data-deadline') + 'Z');
-                const isJoined = badge.getAttribute('data-joined') === 'true';
-                let timeDifference = deadline - now;
-                
-                if (timeDifference <= 0) {
-                    const gracePeriod = 2 * 60 * 1000;
-                    const timeSinceExpired = now - deadline;
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close on backdrop click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal(overlay.id);
+    });
+  });
 
-                    if (isJoined && timeSinceExpired < gracePeriod) {
-                        const remainingGrace = gracePeriod - timeSinceExpired;
-                        const secondsLeft = Math.floor((remainingGrace / 1000) % 60);
-                        badge.innerText = `⚠️ Closed (${secondsLeft}s left)`;
-                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 whitespace-nowrap";
-                        return;
-                    } else {
-                        badge.innerText = "⌛ Expired";
-                        badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 whitespace-nowrap";
-                        const joinBtn = document.getElementById(`join-btn-${eventId}`);
-                        if (joinBtn) {
-                            joinBtn.className = "px-4 py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-medium cursor-not-allowed pointer-events-none";
-                            joinBtn.innerText = "Closed";
-                        }
-                        return;
-                    }
-                }
+  // Countdown engine
+  function initCountdowns() {
+    const badges = document.querySelectorAll('[id^="countdown-badge-"]');
+    function tick() {
+      const now = new Date();
+      badges.forEach(badge => {
+        const id = badge.id.replace('countdown-badge-', '');
+        const deadline = new Date(badge.dataset.deadline + 'Z');
+        const isJoined = badge.dataset.joined === 'true';
+        const diff = deadline - now;
 
-                const totalSeconds = Math.floor(timeDifference / 1000);
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = Math.floor(totalSeconds % 60);
-
-                let timeString = "";
-                if (hours > 0) timeString += `${hours}h `;
-                timeString += `${minutes}m ${seconds}s`;
-                badge.innerText = `⏱️ ${timeString}`;
-                
-                if (totalSeconds < 300) {
-                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator whitespace-nowrap";
-                } else {
-                    badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 whitespace-nowrap";
-                }
-            });
+        if (diff <= 0) {
+          const grace = 2 * 60 * 1000;
+          const elapsed = now - deadline;
+          if (isJoined && elapsed < grace) {
+            const s = Math.floor((grace - elapsed) / 1000 % 60);
+            badge.textContent = `⚠ ${s}s left`;
+            badge.className = 'countdown-badge grace';
+          } else {
+            badge.textContent = 'Expired';
+            badge.className = 'countdown-badge expired';
+            const btn = document.getElementById(`join-btn-${id}`);
+            if (btn && btn.classList.contains('btn-join')) {
+              btn.outerHTML = '<span class="btn-closed">Closed</span>';
+            }
+          }
+          return;
         }
-        tick();
-        setInterval(tick, 1000);
+
+        const totalSec = Math.floor(diff / 1000);
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        badge.textContent = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+        badge.className = totalSec < 300 ? 'countdown-badge urgent' : 'countdown-badge';
+
+        // Animate progress bar based on capacity
+        const bar = document.getElementById(`progress-bar-${id}`);
+        if (bar && bar.style.width === '0px' || (bar && bar.style.width === '0')) {
+          // already set via inline style in template
+        }
+      });
     }
-    document.addEventListener("DOMContentLoaded", initializeCampusCountdowns);
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  document.addEventListener('DOMContentLoaded', initCountdowns);
 </script>
+
 {% endblock %}
