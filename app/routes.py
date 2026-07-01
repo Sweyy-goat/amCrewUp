@@ -3,7 +3,6 @@ from flask import render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import db
 from .models import User, Event, Message
-from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask import current_app as app
 
@@ -19,7 +18,6 @@ def auth_login():
         action = request.form.get('action')
         
         # 1. NEW USER REGISTRATION ROUTINE
-        # 1. NEW USER REGISTRATION ROUTINE
         if action == 'signup':
             email = request.form.get('email')
             name = request.form.get('name')
@@ -28,8 +26,6 @@ def auth_login():
             age = request.form.get('age')
             gender = request.form.get('gender')
             interests = request.form.getlist('interests')
-            
-            # Read the selected avatar filename directly string-wise
             filename = request.form.get('profile_pic', 'avatar1.png')
 
             existing_user = User.query.filter((User.email == email) | (User.roll_number == roll_number)).first()
@@ -73,27 +69,24 @@ def dashboard():
 
     for event in all_events:
         is_member = current_user in event.members
-        
-        # Determine visibility based on whether the current user has joined
         visibility_deadline = event.event_time + timedelta(minutes=2) if is_member else event.event_time
         
-        # Skip events that have expired past their allowed window
         if now > visibility_deadline:
             continue
 
-        # Enforce gender preferences restriction rules
         if event.gender_preference != 'All' and event.gender_preference != current_user.gender:
             continue
 
-        # Calculate a personalized matching score for sorting
         score = 0
         if event.category in user_interest_list or (event.category == 'other' and event.custom_details):
             score += 10
+            
+        if current_user.is_following(event.host):
+            score += 50
         
         event.search_score = score
         filtered_events.append(event)
 
-    # Sort: High affinity matches rank first
     sorted_events = sorted(filtered_events, key=lambda e: e.search_score, reverse=True)
     return render_template('dashboard.html', events=sorted_events, now=now)
 
@@ -115,7 +108,6 @@ def create_event():
         gender_preference=gender_preference, event_time=event_time,
         location=location, host_id=current_user.id
     )
-    # The host automatically joins their own squad room
     new_event.members.append(current_user)
     db.session.add(new_event)
     db.session.commit()
@@ -127,7 +119,6 @@ def join_event(event_id):
     event = Event.query.get_or_404(event_id)
     now = datetime.utcnow()
     
-    # Block users from joining if the event time limit has already expired
     if now > event.event_time:
         flash('This gathering has already passed its join deadline.')
         return redirect(url_for('dashboard'))
@@ -143,11 +134,9 @@ def chat_room(event_id):
     event = Event.query.get_or_404(event_id)
     now = datetime.utcnow()
     
-    # Enforce access: Must be a joined member to enter
     if current_user not in event.members:
         return redirect(url_for('dashboard'))
         
-    # Block entrance if the 2-minute post-event grace window has permanently closed
     if now > (event.event_time + timedelta(minutes=2)):
         flash('The communications channel for this event has been closed.')
         return redirect(url_for('dashboard'))
@@ -155,37 +144,25 @@ def chat_room(event_id):
     messages = Message.query.filter_by(event_id=event.id).order_by(Message.timestamp.asc()).all()
     return render_template('chat.html', event=event, messages=messages)
 
-# ===================================================
-# SOCIAL GRAPH NETWORKING CONTROLLERS (FOLLOW ENGINE)
-# ===================================================
-
 @app.route('/follow/<int:user_id>')
 @login_required
-def follow(user_id):
-    user_to_follow = User.query.get_or_404(user_id)
-    
-    if user_to_follow == current_user:
-        flash("Structural loop error: You cannot register a network link with yourself.")
-        return redirect(request.referrer or url_for('dashboard'))
-        
-    current_user.follow(user_to_follow)
+def follow_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user == current_user:
+        return redirect(url_for('dashboard'))
+    current_user.follow(user)
     db.session.commit()
-    flash(f"Successfully linked to {user_to_follow.name}'s feed stream.")
-    return redirect(request.referrer or url_for('dashboard'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/unfollow/<int:user_id>')
 @login_required
-def unfollow(user_id):
-    user_to_unfollow = User.query.get_or_404(user_id)
-    
-    if user_to_unfollow == current_user:
-        flash("Action denied: Self-referential loop terminal impossible.")
-        return redirect(request.referrer or url_for('dashboard'))
-        
-    current_user.unfollow(user_to_unfollow)
+def unfollow_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user == current_user:
+        return redirect(url_for('dashboard'))
+    current_user.unfollow(user)
     db.session.commit()
-    flash(f"Disconnected from {user_to_unfollow.name}'s broadcasts.")
-    return redirect(request.referrer or url_for('dashboard'))
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout')
 @login_required
