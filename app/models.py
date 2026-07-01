@@ -1,7 +1,7 @@
 from . import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
-from flask import markupsafe
+import markupsafe
 
 @login_manager.user_loader
 def load_user(user_id):
