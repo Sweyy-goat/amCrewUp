@@ -17,6 +17,11 @@ followers = db.Table('followers',
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
+# Whitelist of avatars users are allowed to pick from.
+# Files must live at app/static/uploads/<filename>
+AVAILABLE_AVATARS = ['avatar1.png', 'avatar2.png', 'avatar3.png']
+DEFAULT_AVATAR = 'avatar1.png'
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -25,7 +30,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(200), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(20), nullable=False)
-    profile_pic = db.Column(db.String(200), default='avatar1.png') # Stored purely as string key
+    profile_pic = db.Column(db.String(200), default=DEFAULT_AVATAR) # Stored purely as string key
     interests = db.Column(db.String(500), nullable=False)
     
     events_joined = db.relationship('Event', secondary=user_events, backref=db.backref('members', lazy='dynamic'))
@@ -48,15 +53,16 @@ class User(UserMixin, db.Model):
     def is_following(self, user):
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
-    # Dynamic Jinja Method to inject the matching choice SVG inline anywhere
+    # Renders the user's chosen uploaded avatar image anywhere it's called in Jinja.
+    # Falls back to the default avatar if profile_pic isn't in the whitelist
+    # (e.g. old/bad data), so a bad value never breaks the page.
     def render_avatar(self, extra_classes="w-12 h-12"):
-        svgs = {
-            "avatar1.png": f'<svg class="{extra_classes} text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" /></svg>',
-            "avatar2.png": f'<svg class="{extra_classes} text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1A3.75 3.75 0 0 0 12 18Z" /></svg>',
-            "avatar3.png": f'<svg class="{extra_classes} text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75h6m-6 3h6m-3 3.75V16.5m-7.5-3c0-2.071 1.679-3.75 3.75-3.75h9.75c2.071 0 3.75 1.679 3.75 3.75V19.5a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 19.5v-5.75Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3.75" /></svg>',
-            "avatar4.png": f'<svg class="{extra_classes} text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75s.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" /></svg>'
-        }
-        return markupsafe.Markup(svgs.get(self.profile_pic, svgs["avatar1.png"]))
+        from flask import url_for
+        filename = self.profile_pic if self.profile_pic in AVAILABLE_AVATARS else DEFAULT_AVATAR
+        src = url_for('static', filename=f'uploads/{filename}')
+        return markupsafe.Markup(
+            f'<img src="{src}" alt="avatar" class="{extra_classes} rounded-full object-cover">'
+        )
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
