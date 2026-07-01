@@ -2,321 +2,517 @@
 {% block content %}
 
 <style>
-  :root {
-    /* Apple Pro Color Palette */
-    --canvas: #000000;
-    --surface-primary: #1c1c1e;
-    --surface-secondary: #2c2c2e;
-    --surface-tertiary: #3a3a3c;
-    --accent: #2f80ed;
-    --accent-glow: rgba(47, 128, 237, 0.15);
-    
-    /* Semantic Status Indicators */
-    --status-success: #30d158;
-    --status-warning: #ff9f0a;
-    --status-error: #ff453a;
-    
-    /* Apple Variable Typographic Colors */
-    --label-primary: #ffffff;
-    --label-secondary: #aeaeae;
-    --label-tertiary: #8e8e93;
-    --label-quaternary: #48484a;
-    
-    /* System Materials & Borders */
-    --thin-border: rgba(255, 255, 255, 0.08);
-    --thick-border: rgba(255, 255, 255, 0.15);
-    --glass-background: rgba(28, 28, 30, 0.75);
-    --glass-blur: blur(20px) saturate(210%);
-    
-    /* Geometry */
-    --radius-sf: 14px;
-    --radius-pill: 999px;
-    
-    /* Typography System */
-    --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
   *, *::before, *::after {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background: var(--canvas);
-    color: var(--label-primary);
-    font-family: var(--font-sf);
+    background: linear-gradient(135deg, #eef2ff, #f7f9fc);
+    color: #222;
     min-height: 100vh;
-    padding-bottom: env(safe-area-inset-bottom, 24px);
   }
 
-  /* App Layout Shell */
-  .app-container {
-    max-width: 480px; /* Enforces strict mobile app presentation on desktop viewports */
+  .container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* ===========================
+     MAIN CONTENT AREA
+     =========================== */
+  .main {
+    flex: 1;
+    padding: 35px 50px;
+    width: 100%;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 24px 16px 140px;
   }
 
-  /* Premium Header */
-  .app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-    padding: 0 4px;
-  }
-  .app-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.8px;
-    color: var(--label-primary);
-  }
-  .app-header p {
-    font-size: 13px;
-    color: var(--label-tertiary);
-    margin-top: 2px;
-    font-weight: 400;
-  }
-  .live-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(48, 209, 88, 0.1);
-    border: 1px solid rgba(48, 209, 88, 0.2);
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--status-success);
-    letter-spacing: -0.1px;
-  }
-  .live-pulse {
-    width: 6px;
-    height: 6px;
-    background: var(--status-success);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--status-success);
-    animation: sf-pulse 2s infinite ease-in-out;
-  }
-  @keyframes sf-pulse {
-    0%, 100% { transform: scale(0.9); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 1; }
-  }
-
-  /* Feed Layout */
-  .feed-stream {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  /* Bento Grid/Apple Style Cards */
-  .hangout-card {
-    background: var(--surface-primary);
-    border: 1px solid var(--thin-border);
-    border-radius: var(--radius-sf);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    position: relative;
-    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s;
-  }
-  .hangout-card:active {
-    transform: scale(0.98);
-    background-color: var(--surface-secondary);
-  }
-
-  .card-meta {
+  .topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-  }
-  .category-tag {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    text-transform: uppercase;
-  }
-  .time-ticker {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--label-tertiary);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .time-ticker.urgent { color: var(--status-error); background: rgba(255, 45, 58, 0.1); }
-  .time-ticker.grace { color: var(--status-warning); background: rgba(255, 159, 10, 0.1); }
-  .time-ticker.done { color: var(--label-quaternary); background: transparent; }
-
-  .card-title {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: var(--label-primary);
-    line-height: 1.3;
+    margin-bottom: 45px;
+    gap: 30px;
   }
 
-  /* Micro Grid Metrics Block */
-  .card-metrics {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
-    padding-top: 12px;
-  }
-  .metric-item {
+  .top-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: var(--label-secondary);
+    gap: 15px;
+    flex-shrink: 0;
+  }
+
+  .logo-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6C63FF, #4F46E5);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
+  }
+
+  .top-logo h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.2;
+  }
+
+  .top-logo p {
+    color: #888;
     font-size: 12px;
   }
-  .metric-icon {
-    color: var(--label-tertiary);
+
+  .top-icons {
     display: flex;
     align-items: center;
+    gap: 28px;
+    flex-shrink: 0;
   }
-  
-  /* Action Footer Inside Card */
-  .card-action {
-    margin-top: 2px;
+
+  .notification {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, .08);
+    cursor: pointer;
+    border: none;
+    color: #4b5563;
+    transition: all .3s ease;
   }
-  .sf-btn {
+
+  .notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.15);
+    color: #6C63FF;
+  }
+
+  .notification span {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    background: #ff4d4d;
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+  }
+
+  .profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-align: left;
+  }
+
+  .profile-trigger img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #6C63FF;
+    transition: all .3s ease;
+  }
+
+  .profile-trigger:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(108, 99, 255, 0.4);
+  }
+
+  .profile-trigger h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+  }
+
+  .profile-trigger p {
+    color: #777;
+    font-size: 13px;
+  }
+
+  /* ===========================
+     PAGE HEADER & FILTERS
+     =========================== */
+  .heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .heading h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: .2px;
+  }
+
+  .heading p {
+    margin-top: 8px;
+    color: #777;
+    font-size: 15px;
+  }
+
+  .create-btn {
+    background: #6C63FF;
+    color: #fff;
+    border: none;
+    padding: 15px 28px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all .3s ease;
+  }
+
+  .create-btn:hover {
+    background: #5548ff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(108, 99, 255, .25);
+  }
+
+  /* ===========================
+     EVENT GRID & CARDS
+     =========================== */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 30px;
+    align-items: start;
+  }
+
+  .event-card {
+    background: white;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .08);
+    border: 1px solid rgba(0, 0, 0, .05);
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp .5s ease;
+    transition: all .3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .event-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, .15);
+  }
+
+  .card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+  }
+
+  .card-content h3 {
+    font-size: 22px;
+    margin: 18px 0 12px;
+    color: #222;
+    transition: .3s;
+  }
+
+  .event-card:hover h3 {
+    color: #6C63FF;
+  }
+
+  .tag {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: .3s;
+    text-transform: capitalize;
+  }
+
+  /* Custom Context Category System Mappings */
+  .tag.theme-coding { background: #E9F1FF; color: #2563EB; }
+  .tag.theme-goingout { background: #FFF4E5; color: #F59E0B; }
+  .tag.theme-rides { background: #E8F7EC; color: #10b981; }
+  .tag.theme-sports { background: #F3E8FF; color: #A78BFA; }
+  .tag.theme-other { background: #FFE4E6; color: #F43F5E; }
+  .tag.theme-default { background: #ECEBFF; color: #6C63FF; }
+
+  /* Time Ticker Styles */
+  .time-ticker {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+  .time-ticker.urgent { color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
+  .time-ticker.grace { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+  .time-ticker.done { color: #9ca3af; background: transparent; }
+
+  .metrics-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-top: 12px;
+    border-top: 1px solid #f2f2f2;
+  }
+
+  .event-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .event-info svg {
+    color: #888;
+    flex-shrink: 0;
+  }
+
+  .join-btn, .sf-btn-primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: #6C63FF;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: auto;
+    letter-spacing: .3px;
+    text-align: center;
+    text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 10px 16px;
-    border-radius: var(--radius-sf);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: filter 0.2s, background-color 0.2s;
-    border: none;
-    cursor: pointer;
+    gap: 8px;
+    transition: all .3s ease;
   }
-  .sf-btn-primary {
-    background: #ffffff;
-    color: #000000;
+
+  .join-btn:hover, .sf-btn-primary:hover {
+    background: #5548ff;
+    box-shadow: 0 12px 25px rgba(108, 99, 255, .25);
   }
-  .sf-btn-primary:active { background: #e5e5ea; }
-  .sf-btn-secondary {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--label-primary);
-    border: 1px solid var(--thin-border);
-  }
-  .sf-btn-secondary:active { background: rgba(255, 255, 255, 0.15); }
+
   .sf-btn-disabled {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--label-quaternary);
+    width: 100%;
+    padding: 15px;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    background: #f3f4f6;
+    color: #9ca3af;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: auto;
     pointer-events: none;
-    border: 1px solid rgba(255, 255, 255, 0.02);
+    display: block;
   }
 
   /* Empty State Framework */
   .empty-state {
+    grid-column: 1 / -1;
     text-align: center;
-    padding: 48px 24px;
-    color: var(--label-tertiary);
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 80px 24px;
+    background: white;
+    border-radius: 22px;
+    border: 1px dashed rgba(108, 99, 255, 0.3);
+    color: #666;
   }
 
-  /* iOS Spatial System Modals */
+  /* ===================================================
+     COMPACT FLOATING VIOLET-OUTLINED GLASS DOCK
+     =================================================== */
+  .dock-container {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    padding: 5px;
+  }
+
+  .mac-dock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 8px 24px;
+    border-radius: 30px;
+    border: 1.2px solid rgba(108, 99, 255, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 12px 28px rgba(108, 99, 255, 0.06), 0 4px 10px rgba(0, 0, 0, 0.02);
+    height: 56px;
+  }
+
+  .dock-item {
+    background: none;
+    border: none;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    min-width: 50px;
+  }
+
+  .icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+    color: #4b5563; 
+    transition: all 0.2s ease;
+    width: 24px;
+    height: 24px;
+  }
+
+  .dock-label {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .dock-item:hover .icon-wrapper,
+  .dock-item.active .icon-wrapper {
+    color: #6C63FF;
+    transform: translateY(-1.5px);
+  }
+
+  .dock-item:hover .dock-label,
+  .dock-item.active .dock-label {
+    color: #6C63FF;
+    font-weight: 600;
+  }
+
+  /* Modals Style Layer */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    z-index: 1000;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 2000;
     display: flex;
-    align-items: flex-end; /* Sheet style approach for structural mobile ease */
+    align-items: center;
     justify-content: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    padding: 20px;
   }
+
   .modal-overlay.active {
     opacity: 1;
     pointer-events: auto;
   }
+
   .apple-sheet {
-    background: #151517;
+    background: #ffffff;
     width: 100%;
     max-width: 480px;
-    border-radius: 20px 20px 0 0;
-    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    border-top: 1px solid var(--thick-border);
+    border-radius: 24px;
+    padding: 30px;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.05);
   }
+
   .modal-overlay.active .apple-sheet {
-    transform: translateY(0);
-  }
-  
-  /* Sheet Grabber Handle */
-  .sheet-handle {
-    width: 36px;
-    height: 5px;
-    background: var(--label-quaternary);
-    border-radius: var(--radius-pill);
-    margin: -12px auto 20px;
+    transform: scale(1) translateY(0);
   }
 
   .sheet-title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
-    letter-spacing: -0.4px;
-    color: var(--label-primary);
+    color: #222;
     margin-bottom: 4px;
   }
+
   .sheet-subtitle {
-    font-size: 13px;
-    color: var(--label-tertiary);
+    font-size: 14px;
+    color: #777;
     margin-bottom: 24px;
   }
 
   /* Premium Form Layouts */
-  .form-group {
-    margin-bottom: 16px;
-  }
+  .form-group { margin-bottom: 18px; }
   .form-label {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: var(--label-tertiary);
-    margin-bottom: 6px;
-    padding-left: 2px;
+    color: #4b5563;
+    margin-bottom: 8px;
   }
   .input-sf {
     width: 100%;
-    background: var(--surface-secondary);
-    border: 1px solid var(--thin-border);
-    border-radius: 10px;
-    padding: 12px;
-    font-family: var(--font-sf);
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
     font-size: 15px;
-    color: #ffffff;
+    color: #222;
     outline: none;
-    transition: border-color 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
+    transition: all 0.2s;
   }
   .input-sf:focus {
-    border-color: var(--accent);
+    border-color: #6C63FF;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
   }
   .input-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .input-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -326,15 +522,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
   .profile-pic-frame {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    border: 2px solid var(--accent);
+    border: 3px solid #6C63FF;
     padding: 3px;
-    box-shadow: 0 0 16px var(--accent-glow);
   }
   .profile-pic-frame img {
     width: 100%;
@@ -343,233 +538,180 @@
     object-fit: cover;
   }
   .profile-name-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: -0.4px;
-    margin-top: 12px;
+    margin-top: 14px;
+    color: #222;
   }
   .profile-id-badge {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--label-tertiary);
-    background: rgba(255,255,255,0.05);
-    padding: 3px 8px;
-    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: #6C63FF;
+    background: rgba(108, 99, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
     margin-top: 6px;
   }
   .info-list {
-    background: var(--surface-secondary);
-    border-radius: var(--radius-sf);
+    background: #f9fafb;
+    border-radius: 16px;
     overflow: hidden;
-    margin-bottom: 16px;
-    border: 1px solid var(--thin-border);
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
   }
   .info-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--thin-border);
+    padding: 14px 18px;
+    border-bottom: 1px solid #e5e7eb;
     font-size: 14px;
   }
   .info-row:last-child { border-bottom: none; }
-  .info-row span:first-child { color: var(--label-tertiary); }
-  .info-row span:last-child { color: var(--label-primary); font-weight: 500; }
+  .info-row span:first-child { color: #666; }
+  .info-row span:last-child { color: #222; font-weight: 600; }
 
   .interest-cloud {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 4px 0;
+    gap: 8px;
   }
   .interest-pill {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--label-secondary);
+    background: #ECEBFF;
+    color: #6C63FF;
     font-size: 12px;
     font-weight: 500;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--thin-border);
+    padding: 6px 12px;
+    border-radius: 20px;
   }
 
-  /* Floating Glass Tab Dock */
-  .apple-dock {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 360px;
-    background: var(--glass-background);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--thick-border);
-    border-radius: 28px;
-    padding: 8px 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 900;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  @media(max-width: 992px){
+    .main { padding: 25px; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 20px; }
   }
-  .dock-item {
-    background: none;
-    border: none;
-    color: var(--label-tertiary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    padding: 8px;
-    flex: 1;
-    transition: color 0.2s;
-  }
-  .dock-item:active { color: var(--label-primary); }
-  .dock-item svg { width: 22px; height: 22px; }
-  .dock-item span { font-size: 10px; font-weight: 500; }
-  
-  .dock-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1.5px solid var(--label-tertiary);
-  }
-
-  .dock-center-fab {
-    background: var(--accent);
-    color: #ffffff;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3);
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .dock-center-fab:active {
-    transform: scale(0.92);
-  }
-  .dock-center-fab svg { width: 24px; height: 24px; }
-
-  /* Context Category System Color Mappings */
-  .theme-coding { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
-  .theme-goingout { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-  .theme-rides { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-  .theme-sports { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
-  .theme-other { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
-  .theme-default { background: rgba(255, 255, 255, 0.08); color: var(--label-primary); }
 </style>
 
-<div class="app-container">
-  <!-- Top App Navigation Architecture -->
-  <header class="app-header">
-    <div>
-      <h1>Hangouts</h1>
-      <p>Live on campus right now</p>
-    </div>
-    <div class="live-status">
-      <span class="live-pulse"></span>
-      <span>{{ events|length }} Active</span>
-    </div>
-  </header>
-
-  <!-- Feed Framework -->
-  <main class="feed-stream">
-    {% for event in events %}
-    {% set member_count = event.members.count() %}
-    {% set is_full = member_count >= event.member_limit %}
-    {% set ck = event.category|lower|replace(' ', '') %}
-    {% set valid_cats = ['coding','goingout','rides','sports','other'] %}
-    {% set cat_key = ck if ck in valid_cats else 'default' %}
-
-    <article class="hangout-card">
-      <div class="card-meta">
-        <span class="category-tag theme-{{ cat_key }}">
-          {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
-        </span>
-        <span class="time-ticker" 
-              id="timer-{{ event.id }}" 
-              data-deadline="{{ event.event_time.isoformat() }}" 
-              data-joined="{{ 'true' if current_user in event.members else 'false' }}">—</span>
+<div class="container">
+  <main class="main">
+    
+    <section class="topbar">
+      <div class="top-logo">
+        <div class="logo-circle">H</div>
+        <div>
+          <h2>Hangouts</h2>
+          <p>Live on campus network node</p>
+        </div>
       </div>
 
-      <h2 class="card-title">{{ event.title }}</h2>
-
-      <div class="card-metrics">
-        <div class="metric-item">
-          <div class="metric-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+      <div class="top-icons">
+        <button class="notification" id="bell-notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          <span>3</span>
+        </button>
+        
+        <button class="profile-trigger" onclick="openModal('modal-profile')">
+          <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" alt="Avatar">
+          <div>
+            <h4>{{ current_user.name }}</h4>
+            <p>{{ current_user.roll_number }}</p>
           </div>
-          <span>{{ event.location }}</span>
-        </div>
-        <div class="metric-item">
-          <div class="metric-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
-          </div>
-          <span>{{ member_count }}/{{ event.member_limit }} · {{ event.host.name }}</span>
-        </div>
-        <div class="metric-item">
-          <div class="metric-icon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
-          </div>
-          <span>{{ event.event_time.strftime('%b %d, %I:%M %p') }}</span>
-        </div>
-        {% if event.total_cost > 0 %}
-        <div class="metric-item" style="color: var(--status-success);">
-          <div class="metric-icon" style="color: var(--status-success);">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25H9m6 3H9m3 6l-3-3h1.5a3 3 0 1 0 0-6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-          </div>
-          <span>₹{{ (event.total_cost / (member_count if member_count > 0 else 1))|round(1) }}/head</span>
-        </div>
-        {% endif %}
+        </button>
       </div>
+    </section>
 
-      <div class="card-action">
-        {% if current_user in event.members %}
-        <a href="/chat/{{ event.id }}" class="sf-btn sf-btn-primary">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-3.057a1.526 1.526 0 0 1 .924-.313H19.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H4.5A2.25 2.25 0 0 0 2.25 6.75v6.75Z"/></svg>
-          Open Chat
-        </a>
-        {% elif is_full %}
-        <span class="sf-btn sf-btn-disabled">Plan is Full</span>
-        {% else %}
-        <a href="/join-event/{{ event.id }}" id="join-{{ event.id }}" class="sf-btn sf-btn-secondary">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-          Join Plan
-        </a>
-        {% endif %}
+    <div class="heading">
+      <div>
+        <h1>Active Hub Feeds</h1>
+        <p>Discover real-time student plans, sync metrics, and squads active right now.</p>
       </div>
-    </article>
-    {% endfor %}
-
-    {% if not events %}
-    <div class="empty-state">
-      <p>No live broadcasts on campus.</p>
-      <p style="font-size: 12px; margin-top: 4px; color: var(--label-quaternary);">Tap the button below to start one.</p>
+      <button class="create-btn" onclick="openModal('modal-create')">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+        Broadcast Plan
+      </button>
     </div>
-    {% endif %}
+
+    <div class="cards">
+      {% for event in events %}
+      {% set member_count = event.members.count() %}
+      {% set is_full = member_count >= event.member_limit %}
+      {% set ck = event.category|lower|replace(' ', '') %}
+      {% set valid_cats = ['coding','goingout','rides','sports','other'] %}
+      {% set cat_key = ck if ck in valid_cats else 'default' %}
+
+      <article class="event-card">
+        <div class="card-content">
+          <div class="card-top-row">
+            <span class="tag theme-{{ cat_key }}">
+              {% if event.category == 'other' %}{{ event.custom_details }}{% else %}{{ event.category }}{% endif %}
+            </span>
+            <span class="time-ticker" 
+                  id="timer-{{ event.id }}" 
+                  data-deadline="{{ event.event_time.isoformat() }}" 
+                  data-joined="{{ 'true' if current_user in event.members else 'false' }}">—</span>
+          </div>
+
+          <h3>{{ event.title }}</h3>
+          
+          <div class="metrics-box">
+            <div class="event-info">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+              <span>{{ event.location }}</span>
+            </div>
+            <div class="event-info">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+              <span>{{ member_count }}/{{ event.member_limit }} Squad · {{ event.host.name }}</span>
+            </div>
+            <div class="event-info">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+              <span>{{ event.event_time.strftime('%b %d, %I:%M %p') }}</span>
+            </div>
+            {% if event.total_cost > 0 %}
+            <div class="event-info" style="color: #28A745; font-weight: 500;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25H9m6 3H9m3 6l-3-3h1.5a3 3 0 1 0 0-6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              <span>₹{{ (event.total_cost / (member_count if member_count > 0 else 1))|round(1) }} / head</span>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if current_user in event.members %}
+          <a href="/chat/{{ event.id }}" class="sf-btn-primary">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-3.057a1.526 1.526 0 0 1 .924-.313H19.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H4.5A2.25 2.25 0 0 0 2.25 6.75v6.75Z"/></svg>
+            Open Live Chat
+          </a>
+          {% elif is_full %}
+          <span class="sf-btn-disabled">Plan Configuration Full</span>
+          {% else %}
+          <a href="/join-event/{{ event.id }}" id="join-{{ event.id }}" class="join-btn">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Join Plan Node
+          </a>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+
+      {% if not events %}
+      <div class="empty-state">
+        <h3 style="margin-bottom: 8px; color: #6C63FF;">No Live Broadcast Feeds Found</h3>
+        <p>The system grid is currently clear. Click "Broadcast Plan" above to activate a live network element.</p>
+      </div>
+      {% endif %}
+    </div>
   </main>
 </div>
 
-<!-- Modal Layer: Create -->
 <div id="modal-create" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-create')">
   <div class="apple-sheet">
-    <div class="sheet-handle"></div>
-    <p class="sheet-title">Broadcast a Plan</p>
-    <p class="sheet-subtitle">Instantly alerts the campus grid network.</p>
+    <p class="sheet-title">Broadcast Plan Node</p>
+    <p class="sheet-subtitle">Instantly triggers alert signals to the active campus grid loop.</p>
     <form action="/create-event" method="POST">
       <div class="form-group">
-        <label class="form-label">Activity Heading</label>
-        <input type="text" name="title" required placeholder="e.g., Badminton 5-Aside" class="input-sf">
+        <label class="form-label">Activity Title</label>
+        <input type="text" name="title" required placeholder="e.g., Lab Session Study or Turf 5v5" class="input-sf">
       </div>
       <div class="input-grid-2 form-group">
         <div>
-          <label class="form-label">Category</label>
+          <label class="form-label">Category Node</label>
           <select name="category" class="input-sf" onchange="document.getElementById('cat-custom').style.display = (this.value=='other' ? 'block' : 'none')">
             <option value="coding">Coding</option>
             <option value="going out">Going Out</option>
@@ -579,8 +721,8 @@
           </select>
         </div>
         <div id="cat-custom" style="display: none;">
-          <label class="form-label">Specify</label>
-          <input type="text" name="custom_details" placeholder="e.g., Chess Club" class="input-sf">
+          <label class="form-label">Specify Custom</label>
+          <input type="text" name="custom_details" placeholder="e.g., Hackathon Prep" class="input-sf">
         </div>
       </div>
       <div class="input-grid-3 form-group">
@@ -593,7 +735,7 @@
           <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="input-sf">
         </div>
         <div>
-          <label class="form-label">Gender Access</label>
+          <label class="form-label">Gender Allocation</label>
           <select name="gender_preference" class="input-sf">
             <option value="All">All</option>
             <option value="Male">Male</option>
@@ -603,23 +745,21 @@
       </div>
       <div class="input-grid-2 form-group" style="margin-bottom: 24px;">
         <div>
-          <label class="form-label">Schedule Time</label>
+          <label class="form-label">Target Schedule Time</label>
           <input type="datetime-local" name="event_time" required class="input-sf">
         </div>
         <div>
-          <label class="form-label">Hub / Spot</label>
-          <input type="text" name="location" required placeholder="e.g., Student Center" class="input-sf">
+          <label class="form-label">Hub / Spot Location</label>
+          <input type="text" name="location" required placeholder="e.g., Campus Center" class="input-sf">
         </div>
       </div>
-      <button type="submit" class="sf-btn sf-btn-primary" style="padding: 14px;">Publish Broadcast</button>
+      <button type="submit" class="sf-btn-primary" style="padding: 16px; border-radius: 12px;">Publish Broadcast</button>
     </form>
   </div>
 </div>
 
-<!-- Modal Layer: Profile -->
 <div id="modal-profile" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-profile')">
   <div class="apple-sheet">
-    <div class="sheet-handle"></div>
     <div class="profile-avatar-container">
       <div class="profile-pic-frame">
         <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" alt="Avatar">
@@ -628,11 +768,11 @@
       <span class="profile-id-badge">{{ current_user.roll_number }}</span>
     </div>
     <div class="info-list">
-      <div class="info-row"><span>Institutional Email</span><span>{{ current_user.email }}</span></div>
-      <div class="info-row"><span>Demographics</span><span>{{ current_user.age }} yrs · {{ current_user.gender }}</span></div>
+      <div class="info-row"><span>Institutional Node Email</span><span>{{ current_user.email }}</span></div>
+      <div class="info-row"><span>Identity Matrix</span><span>{{ current_user.age }} yrs · {{ current_user.gender }}</span></div>
     </div>
     <div class="form-group">
-      <label class="form-label">Interests Matrix</label>
+      <label class="form-label">Interests Parameter Cloud</label>
       <div class="interest-cloud">
         {% for interest in current_user.interests.split(',') %}
         <span class="interest-pill">#{{ interest.strip() }}</span>
@@ -642,17 +782,15 @@
   </div>
 </div>
 
-<!-- Modal Layer: Insights -->
 <div id="modal-stats" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-stats')">
   <div class="apple-sheet">
-    <div class="sheet-handle"></div>
     <p class="sheet-title">Campus Hub Diagnostics</p>
-    <p class="sheet-subtitle">Real-time local node metrics.</p>
+    <p class="sheet-subtitle">Real-time local node analytical overview metrics.</p>
     <div class="info-list" style="margin-bottom: 0;">
       <div class="info-row"><span>Total Network Feeds</span><span>{{ events|length }}</span></div>
       <div class="info-row">
         <span>Tailored Matches</span>
-        <span style="color: var(--accent); font-weight: 700;">
+        <span style="color: #6C63FF; font-weight: 700;">
           {% set count = namespace(value=0) %}
           {% for e in events %}{% if e.search_score > 0 %}{% set count.value = count.value + 1 %}{% endif %}{% endfor %}
           {{ count.value }}
@@ -662,33 +800,49 @@
   </div>
 </div>
 
-<!-- Apple Floating Navigation Dock -->
-<nav class="apple-dock">
-  <button class="dock-item" onclick="openModal('modal-profile')">
-    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="dock-avatar" alt="Profile">
-    <span>Profile</span>
-  </button>
-  <button class="dock-center-fab" onclick="openModal('modal-create')">
-    <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-  </button>
-  <button class="dock-item" onclick="openModal('modal-stats')">
-    <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/></svg>
-    <span>Insights</span>
-  </button>
-</nav>
+<div class="dock-container">
+  <nav class="mac-dock">
+    <button class="dock-item active" id="dock-home" onclick="window.location.reload();">
+      <div class="icon-wrapper">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:18px; height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+      </div>
+      <span class="dock-label">Grid</span>
+    </button>
+    <button class="dock-item" id="dock-create" onclick="openModal('modal-create')">
+      <div class="icon-wrapper">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:18px; height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+      </div>
+      <span class="dock-label">Broadcast</span>
+    </button>
+    <button class="dock-item" id="dock-insights" onclick="openModal('modal-stats')">
+      <div class="icon-wrapper">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:18px; height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/></svg>
+      </div>
+      <span class="dock-label">Insights</span>
+    </button>
+  </nav>
+</div>
 
 <script>
   function openModal(id) {
     const modal = document.getElementById(id);
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    if(window.navigator.vibrate) window.navigator.vibrate(8); /* Native micro haptic simulation */
+    if(modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Dynamic shift of active dock element representations
+      if(id === 'modal-create') updateActiveDock('dock-create');
+      if(id === 'modal-stats') updateActiveDock('dock-insights');
+    }
   }
 
   function closeModal(id) {
     const modal = document.getElementById(id);
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
+    if(modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      updateActiveDock('dock-home');
+    }
   }
 
   function handleOverlayClick(e, id) {
@@ -697,12 +851,29 @@
     }
   }
 
+  function updateActiveDock(activeId) {
+    document.querySelectorAll(".mac-dock .dock-item").forEach(item => {
+      item.classList.remove("active");
+    });
+    const targetedDock = document.getElementById(activeId);
+    if(targetedDock) targetedDock.classList.add("active");
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay.active').forEach(modal => closeModal(modal.id));
     }
   });
 
+  // Top Notifications Hub Event Trigger Setup
+  const alertBell = document.getElementById('bell-notifications');
+  if(alertBell) {
+    alertBell.addEventListener('click', () => {
+      alert("System Diagnostics: You have 3 incoming updates tracking matching project modules.");
+    });
+  }
+
+  // Live Countdowns Tracking Logic Matrix
   function runCountdowns() {
     const timers = document.querySelectorAll('.time-ticker');
     function tick() {
@@ -723,9 +894,9 @@
           } else {
             el.textContent = 'Ended';
             el.className = 'time-ticker done';
-            const jbtn = document.getElementById('join-' + id);
-            if (jbtn) {
-              jbtn.outerHTML = '<span class="sf-btn sf-btn-disabled">Closed</span>';
+            const joinBtnNode = document.getElementById('join-' + id);
+            if (joinBtnNode) {
+              joinBtnNode.outerHTML = '<span class="sf-btn-disabled">Closed Plan</span>';
             }
           }
           return;
