@@ -338,25 +338,23 @@
     }
 
     function toggleForm(target) {
-        const loginForm = document.getElementById('form-login');
-        const signupForm = document.getElementById('form-signup');
-        const tabLogin = document.getElementById('tab-login');
-        const tabSignup = document.getElementById('tab-signup');
+    const loginForm = document.getElementById('form-login');
+    const signupForm = document.getElementById('form-signup');
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
 
-        if (target === 'login') {
-            signupForm.setAttribute('data-state', 'hidden');
-            loginForm.setAttribute('data-state', 'visible');
-            tabLogin.className = "tab-btn text-[#1d1d1f] pb-3 focus:outline-none font-semibold";
-            tabSignup.className = "tab-btn text-black/35 hover:text-black/60 pb-3 focus:outline-none";
-            positionIndicator('tab-login');
-        } else {
-            loginForm.setAttribute('data-state', 'hidden');
-            signupForm.setAttribute('data-state', 'visible');
-            tabSignup.className = "tab-btn text-[#1d1d1f] pb-3 focus:outline-none font-semibold";
-            tabLogin.className = "tab-btn text-black/35 hover:text-black/60 pb-3 focus:outline-none";
-            positionIndicator('tab-signup');
-        }
+    if(target === 'login') {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        tabLogin.className = "text-indigo-600 border-b-2 border-indigo-600 pb-3 -mb-3.5 focus:outline-none";
+        tabSignup.className = "text-slate-400 hover:text-slate-600 pb-3 focus:outline-none";
+    } else {
+        signupForm.classList.remove('hidden'); // <-- Safely reveals form
+        loginForm.classList.add('hidden');
+        tabSignup.className = "text-indigo-600 border-b-2 border-indigo-600 pb-3 -mb-3.5 focus:outline-none";
+        tabLogin.className = "text-slate-400 hover:text-slate-600 pb-3 focus:outline-none";
     }
+}
 
     document.addEventListener('DOMContentLoaded', () => positionIndicator('tab-login'));
 </script>
