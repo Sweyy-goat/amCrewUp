@@ -19,6 +19,7 @@ def auth_login():
         action = request.form.get('action')
         
         # 1. NEW USER REGISTRATION ROUTINE
+        # 1. NEW USER REGISTRATION ROUTINE
         if action == 'signup':
             email = request.form.get('email')
             name = request.form.get('name')
@@ -28,18 +29,13 @@ def auth_login():
             gender = request.form.get('gender')
             interests = request.form.getlist('interests')
             
-            # Prevent duplicate profiles
+            # Read the selected avatar filename directly string-wise
+            filename = request.form.get('profile_pic', 'avatar1.png')
+
             existing_user = User.query.filter((User.email == email) | (User.roll_number == roll_number)).first()
             if existing_user:
                 flash('An account with this Email or Roll Number already exists.')
                 return redirect(url_for('auth_login'))
-
-            # Handle Profile Picture Upload
-            file = request.files.get('profile_pic')
-            filename = 'default.jpg'
-            if file and file.filename != '':
-                filename = secure_filename(f"{roll_number}_{file.filename}")
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
             user = User(
                 email=email, name=name, roll_number=roll_number, password=password, 
