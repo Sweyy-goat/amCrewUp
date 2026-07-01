@@ -159,6 +159,38 @@ def chat_room(event_id):
     messages = Message.query.filter_by(event_id=event.id).order_by(Message.timestamp.asc()).all()
     return render_template('chat.html', event=event, messages=messages)
 
+# ===================================================
+# SOCIAL GRAPH NETWORKING CONTROLLERS (FOLLOW ENGINE)
+# ===================================================
+
+@app.route('/follow/<int:user_id>')
+@login_required
+def follow(user_id):
+    user_to_follow = User.query.get_or_404(user_id)
+    
+    if user_to_follow == current_user:
+        flash("Structural loop error: You cannot register a network link with yourself.")
+        return redirect(request.referrer or url_for('dashboard'))
+        
+    current_user.follow(user_to_follow)
+    db.session.commit()
+    flash(f"Successfully linked to {user_to_follow.name}'s feed stream.")
+    return redirect(request.referrer or url_for('dashboard'))
+
+@app.route('/unfollow/<int:user_id>')
+@login_required
+def unfollow(user_id):
+    user_to_unfollow = User.query.get_or_404(user_id)
+    
+    if user_to_unfollow == current_user:
+        flash("Action denied: Self-referential loop terminal impossible.")
+        return redirect(request.referrer or url_for('dashboard'))
+        
+    current_user.unfollow(user_to_unfollow)
+    db.session.commit()
+    flash(f"Disconnected from {user_to_unfollow.name}'s broadcasts.")
+    return redirect(request.referrer or url_for('dashboard'))
+
 @app.route('/logout')
 @login_required
 def logout():

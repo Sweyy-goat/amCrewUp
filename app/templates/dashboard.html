@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap');
 
   *, *::before, *::after {
     margin: 0;
@@ -27,7 +27,7 @@
   }
 
   /* ===========================
-     MAIN CONTENT AREA
+      MAIN CONTENT AREA
      =========================== */
   .main {
     flex: 1;
@@ -159,7 +159,7 @@
   }
 
   /* ===========================
-     PAGE HEADER & FILTERS
+      PAGE HEADER & FILTERS
      =========================== */
   .heading {
     display: flex;
@@ -205,7 +205,7 @@
   }
 
   /* ===========================
-     EVENT GRID & CARDS
+      EVENT GRID & CARDS
      =========================== */
   .cards {
     display: grid;
@@ -315,6 +315,38 @@
     flex-shrink: 0;
   }
 
+  /* ===========================
+      FOLLOW ENGINE GRAPH UI SYSTEM
+     =========================== */
+  .follow-action-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #6C63FF;
+    color: #6C63FF;
+    background: transparent;
+  }
+
+  .follow-action-btn:hover {
+    background: #6C63FF;
+    color: white;
+  }
+
+  .follow-action-btn.following {
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    background: #f3f4f6;
+  }
+
+  .follow-action-btn.following:hover {
+    border-color: #ff4d4d;
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.05);
+  }
+
   .join-btn, .sf-btn-primary {
     width: 100%;
     padding: 15px;
@@ -368,7 +400,7 @@
   }
 
   /* ===================================================
-     COMPACT FLOATING VIOLET-OUTLINED GLASS DOCK
+      COMPACT FLOATING VIOLET-OUTLINED GLASS DOCK
      =================================================== */
   .dock-container {
     position: fixed;
@@ -619,6 +651,18 @@
       </div>
     </section>
 
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div style="margin-bottom: 30px;">
+          {% for message in messages %}
+            <div style="background: rgba(108, 99, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); color: #4F46E5; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <div class="heading">
       <div>
         <h1>Active Hub Feeds</h1>
@@ -657,10 +701,22 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
               <span>{{ event.location }}</span>
             </div>
-            <div class="event-info">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
-              <span>{{ member_count }}/{{ event.member_limit }} Squad · {{ event.host.name }}</span>
+
+            <div class="event-info" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+                <span>{{ member_count }}/{{ event.member_limit }} Squad · <strong>{{ event.host.name }}</strong></span>
+              </div>
+              
+              {% if event.host.id != current_user.id %}
+                {% if current_user.is_following(event.host) %}
+                  <a href="/unfollow/{{ event.host.id }}" class="follow-action-btn following">Following</a>
+                {% else %}
+                  <a href="/follow/{{ event.host.id }}" class="follow-action-btn">+ Follow</a>
+                {% endif %}
+              {% endif %}
             </div>
+
             <div class="event-info">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
               <span>{{ event.event_time.strftime('%b %d, %I:%M %p') }}</span>

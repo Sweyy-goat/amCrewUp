@@ -6,29 +6,56 @@ from datetime import datetime
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Junction table for many-to-many relationship: Users joining Event Groups
+# Junction table 1: Many-to-Many relationship for Users joining Event Groups
 user_events = db.Table('user_events',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('event_id', db.Integer, db.ForeignKey('event.id'), primary_key=True)
 )
 
+# Junction table 2: Self-Referential Many-to-Many relationship for User Following
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False) # <-- Add this explicit line
+    name = db.Column(db.String(100), nullable=False)
     roll_number = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(20), nullable=False)
     profile_pic = db.Column(db.String(200), default='default.jpg')
-    interests = db.Column(db.String(500), nullable=False)
+    interests = db.Column(db.String(500), nullable=False) # Comma-separated tags
     
+    # Event Relationship mapping
     events_joined = db.relationship('Event', secondary=user_events, backref=db.backref('members', lazy='dynamic'))
+    
+    # Self-referential networking mapping configuration
+    followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
+    )
+
+    # Social Network Helper Engines
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), nullable=False) # coding, sports, rides, custom, etc.
+    category = db.Column(db.String(50), nullable=False) # coding, sports, rides, other, etc.
     custom_details = db.Column(db.String(200))
     total_cost = db.Column(db.Float, default=0.0)
     member_limit = db.Column(db.Integer, nullable=False)
@@ -36,8 +63,9 @@ class Event(db.Model):
     event_time = db.Column(db.DateTime, nullable=False)
     location = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    host_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
+    # Foreign key references
+    host_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     host = db.relationship('User', backref=db.backref('hosted_events', lazy=True))
 
 class Message(db.Model):
