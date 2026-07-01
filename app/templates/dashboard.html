@@ -5,67 +5,113 @@
         <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Discover Hangouts</h1>
         <p class="text-slate-500 text-sm mt-1">Personalized events curated based on your active preferences.</p>
     </div>
-    <button onclick="document.getElementById('event-modal').classList.toggle('hidden')" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 shadow-sm shadow-indigo-100 transition">
-        Create Event Group
-    </button>
 </div>
 
-<div id="event-modal" class="hidden bg-white border border-slate-200 rounded-2xl p-6 mb-8 max-w-xl shadow-xl transition-all">
-    <h3 class="font-bold text-lg text-slate-900 mb-4">Host a New Gathering</h3>
-    <form action="/create-event" method="POST" class="space-y-4">
-        <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
-            <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
-        </div>
-        <div class="grid grid-cols-2 gap-4">
+<div id="event-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-xl shadow-2xl relative animate-fade-in">
+        <button onclick="document.getElementById('event-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
+        <h3 class="font-bold text-lg text-slate-900 mb-4">Host a New Gathering</h3>
+        <form action="/create-event" method="POST" class="space-y-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white">
-                    <option value="coding">💻 Coding</option>
-                    <option value="going out">🍕 Going Out</option>
-                    <option value="rides">🚗 Joined Rides</option>
-                    <option value="sports">⚽ Turf Booking / Sports</option>
-                    <option value="other">✨ Other Custom Event</option>
-                </select>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
+                <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
             </div>
-            <div id="custom-input" class="hidden">
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
-                <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                    <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
+                        <option value="coding">💻 Coding</option>
+                        <option value="going out">🍕 Going Out</option>
+                        <option value="rides">🚗 Joined Rides</option>
+                        <option value="sports">⚽ Turf Booking / Sports</option>
+                        <option value="other">✨ Other Custom Event</option>
+                    </select>
+                </div>
+                <div id="custom-input" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
+                    <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
             </div>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
-                <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
+                    <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
+                    <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
+                    <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
+                        <option value="All">Open to All</option>
+                        <option value="Male">Male Only</option>
+                        <option value="Female">Female Only</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
-                <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Time & Date</label>
+                    <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
+                    <input type="text" name="location" required placeholder="e.g., Main Gate / Ground" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                </div>
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
-                <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white">
-                    <option value="All">Open to All</option>
-                    <option value="Male">Male Only</option>
-                    <option value="Female">Female Only</option>
-                </select>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Time & Date</label>
-                <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
-                <input type="text" name="location" required placeholder="e.g., Main Gate / Ground" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
-            </div>
-        </div>
-        <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
-    </form>
+            <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
+        </form>
+    </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
+        <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
+        <div class="flex flex-col items-center text-center">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="w-20 h-20 rounded-full border-2 border-indigo-500 object-cover mb-3 shadow-xs">
+            <h3 class="font-bold text-xl text-slate-900">{{ current_user.name }}</h3>
+            <span class="text-xs font-mono px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md mt-1">{{ current_user.roll_number }}</span>
+            
+            <div class="w-full mt-6 space-y-3 text-left border-t border-slate-100 pt-4 text-sm">
+                <div class="flex justify-between"><span class="text-slate-500 font-medium">Email:</span> <span class="text-slate-800">{{ current_user.email }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500 font-medium">Age / Gender:</span> <span class="text-slate-800">{{ current_user.age }} / {{ current_user.gender }}</span></div>
+                <div>
+                    <span class="text-slate-500 font-medium block mb-1.5">Your Core Interests:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for interest in current_user.interests.split(',') %}
+                        <span class="text-xs font-medium px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg"># {{ interest }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="stats-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
+        <button onclick="document.getElementById('stats-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
+        <h3 class="font-bold text-lg text-slate-900 mb-3">Campus Network Status</h3>
+        <p class="text-xs text-slate-500 mb-4">Live micro-metrics across the immediate college campus cluster.</p>
+        <div class="space-y-3">
+            <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
+                <span class="text-xs text-slate-600 font-medium">Total Active Broadcasts</span>
+                <span class="text-sm font-bold text-slate-900">{{ events|length }}</span>
+            </div>
+            <div class="p-3 bg-indigo-50/60 rounded-xl flex justify-between items-center">
+                <span class="text-xs text-indigo-700 font-medium">Your Matching Sync Slots</span>
+                <span class="text-sm font-bold text-indigo-600">
+                    {% set count = namespace(value=0) %}
+                    {% for e in events %}{% if e.search_score > 0 %}{% set count.value = count.value + 1 %}{% endif %}{% endfor %}
+                    {{ count.value }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-28">
     {% for event in events %}
     <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition flex flex-col justify-between relative overflow-hidden">
         
@@ -119,6 +165,30 @@
     {% endfor %}
 </div>
 
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4">
+    <div class="bg-slate-900/90 backdrop-blur-md shadow-xl border border-white/10 rounded-2xl px-6 py-3 flex justify-between items-center text-white">
+        
+        <button onclick="document.getElementById('profile-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 opacity-75 hover:opacity-100 transition focus:outline-none">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="w-5 h-5 rounded-full object-cover border border-white/20">
+            <span class="text-[10px] font-medium tracking-tight">Profile</span>
+        </button>
+
+        <button onclick="document.getElementById('event-modal').classList.remove('hidden')" class="flex flex-col items-center justify-center bg-indigo-600 hover:bg-indigo-500 w-12 h-12 rounded-full -mt-6 border-4 border-slate-900 shadow-md transition focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+        </button>
+
+        <button onclick="document.getElementById('stats-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 opacity-75 hover:opacity-100 transition focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+            </svg>
+            <span class="text-[10px] font-medium tracking-tight">Insights</span>
+        </button>
+
+    </div>
+</div>
+
 <script>
     function initializeCampusCountdowns() {
         const badges = document.querySelectorAll('[id^="countdown-badge-"]');
@@ -132,7 +202,7 @@
                 let timeDifference = deadline - now;
                 
                 if (timeDifference <= 0) {
-                    const gracePeriod = 2 * 60 * 1000; // 2 minutes in milliseconds
+                    const gracePeriod = 2 * 60 * 1000;
                     const timeSinceExpired = now - deadline;
 
                     if (isJoined && timeSinceExpired < gracePeriod) {
@@ -163,7 +233,7 @@
                 timeString += `${minutes}m ${seconds}s`;
                 badge.innerText = `⏱️ ${timeString}`;
                 
-                if (totalSeconds < 300) { // Under 5 minutes remaining
+                if (totalSeconds < 300) {
                     badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator whitespace-nowrap";
                 } else {
                     badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 whitespace-nowrap";
