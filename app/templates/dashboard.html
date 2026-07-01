@@ -3,118 +3,38 @@
 
 <style>
   :root {
-    /* Fonts */
-    --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
-    --radius-sf: 14px;
-    --radius-pill: 999px;
-    
-    /* Semantic Status Indicators (Universal) */
-    --status-success: #30d158;
-    --status-warning: #ff9f0a;
-    --status-error: #ff453a;
-  }
-
-  /* Dark Mode Palette (Default) */
-  [data-theme="dark"] {
+    /* Apple Pro Color Palette */
     --canvas: #000000;
     --surface-primary: #1c1c1e;
     --surface-secondary: #2c2c2e;
     --surface-tertiary: #3a3a3c;
-    --accent: #0a84ff;
-    --accent-glow: rgba(10, 132, 255, 0.15);
+    --accent: #2f80ed;
+    --accent-glow: rgba(47, 128, 237, 0.15);
     
+    /* Semantic Status Indicators */
+    --status-success: #30d158;
+    --status-warning: #ff9f0a;
+    --status-error: #ff453a;
+    
+    /* Apple Variable Typographic Colors */
     --label-primary: #ffffff;
     --label-secondary: #aeaeae;
     --label-tertiary: #8e8e93;
     --label-quaternary: #48484a;
     
+    /* System Materials & Borders */
     --thin-border: rgba(255, 255, 255, 0.08);
     --thick-border: rgba(255, 255, 255, 0.15);
     --glass-background: rgba(28, 28, 30, 0.75);
     --glass-blur: blur(20px) saturate(210%);
     
-    /* Category Theme Background Overlays */
-    --overlay-coding: rgba(56, 189, 248, 0.1);
-    --overlay-goingout: rgba(245, 158, 11, 0.1);
-    --overlay-rides: rgba(16, 185, 129, 0.1);
-    --overlay-sports: rgba(167, 139, 250, 0.1);
-    --overlay-other: rgba(244, 63, 94, 0.1);
-  }
-
-  /* Light Mode Palette */
-  [data-theme="light"] {
-    --canvas: #f2f2f7;
-    --surface-primary: #ffffff;
-    --surface-secondary: #f2f2f7;
-    --surface-tertiary: #e5e5ea;
-    --accent: #007aff;
-    --accent-glow: rgba(0, 122, 255, 0.15);
+    /* Geometry */
+    --radius-sf: 14px;
+    --radius-pill: 999px;
     
-    --label-primary: #000000;
-    --label-secondary: #3c3c43.99;
-    --label-tertiary: #3c3c43.60;
-    --label-quaternary: #3c3c43.30;
-    
-    --thin-border: rgba(0, 0, 0, 0.06);
-    --thick-border: rgba(0, 0, 0, 0.12);
-    --glass-background: rgba(255, 255, 255, 0.8);
-    --glass-blur: blur(20px) saturate(190%);
-    
-    /* Category Theme Background Overlays */
-    --overlay-coding: rgba(56, 189, 248, 0.15);
-    --overlay-goingout: rgba(245, 158, 11, 0.15);
-    --overlay-rides: rgba(16, 185, 129, 0.15);
-    --overlay-sports: rgba(167, 139, 250, 0.15);
-    --overlay-other: rgba(244, 63, 94, 0.15);
-  }
-
-  /* Handle System Setting Auto Match */
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]):not([data-theme="dark"]) {
-      --canvas: #000000;
-      --surface-primary: #1c1c1e;
-      --surface-secondary: #2c2c2e;
-      --surface-tertiary: #3a3a3c;
-      --accent: #0a84ff;
-      --accent-glow: rgba(10, 132, 255, 0.15);
-      --label-primary: #ffffff;
-      --label-secondary: #aeaeae;
-      --label-tertiary: #8e8e93;
-      --label-quaternary: #48484a;
-      --thin-border: rgba(255, 255, 255, 0.08);
-      --thick-border: rgba(255, 255, 255, 0.15);
-      --glass-background: rgba(28, 28, 30, 0.75);
-      --glass-blur: blur(20px) saturate(210%);
-      --overlay-coding: rgba(56, 189, 248, 0.1);
-      --overlay-goingout: rgba(245, 158, 11, 0.1);
-      --overlay-rides: rgba(16, 185, 129, 0.1);
-      --overlay-sports: rgba(167, 139, 250, 0.1);
-      --overlay-other: rgba(244, 63, 94, 0.1);
-    }
-  }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="light"]):not([data-theme="dark"]) {
-      --canvas: #f2f2f7;
-      --surface-primary: #ffffff;
-      --surface-secondary: #f2f2f7;
-      --surface-tertiary: #e5e5ea;
-      --accent: #007aff;
-      --accent-glow: rgba(0, 122, 255, 0.15);
-      --label-primary: #000000;
-      --label-secondary: #3c3c43.99;
-      --label-tertiary: #3c3c43.60;
-      --label-quaternary: #3c3c43.30;
-      --thin-border: rgba(0, 0, 0, 0.06);
-      --thick-border: rgba(0, 0, 0, 0.12);
-      --glass-background: rgba(255, 255, 255, 0.8);
-      --glass-blur: blur(20px) saturate(190%);
-      --overlay-coding: rgba(56, 189, 248, 0.15);
-      --overlay-goingout: rgba(245, 158, 11, 0.15);
-      --overlay-rides: rgba(16, 185, 129, 0.15);
-      --overlay-sports: rgba(167, 139, 250, 0.15);
-      --overlay-other: rgba(244, 63, 94, 0.15);
-    }
+    /* Typography System */
+    --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
   }
 
   *, *::before, *::after {
@@ -131,17 +51,16 @@
     font-family: var(--font-sf);
     min-height: 100vh;
     padding-bottom: env(safe-area-inset-bottom, 24px);
-    transition: background-color 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   /* App Layout Shell */
   .app-container {
-    max-width: 480px;
+    max-width: 480px; /* Enforces strict mobile app presentation on desktop viewports */
     margin: 0 auto;
     padding: 24px 16px 140px;
   }
 
-  /* Header Configuration */
+  /* Premium Header */
   .app-header {
     display: flex;
     justify-content: space-between;
@@ -159,6 +78,7 @@
     font-size: 13px;
     color: var(--label-tertiary);
     margin-top: 2px;
+    font-weight: 400;
   }
   .live-status {
     display: flex;
@@ -171,6 +91,7 @@
     font-size: 11px;
     font-weight: 600;
     color: var(--status-success);
+    letter-spacing: -0.1px;
   }
   .live-pulse {
     width: 6px;
@@ -185,14 +106,14 @@
     50% { transform: scale(1.2); opacity: 1; }
   }
 
-  /* Feed System */
+  /* Feed Layout */
   .feed-stream {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  /* Cards Setup */
+  /* Bento Grid/Apple Style Cards */
   .hangout-card {
     background: var(--surface-primary);
     border: 1px solid var(--thin-border);
@@ -202,7 +123,7 @@
     flex-direction: column;
     gap: 14px;
     position: relative;
-    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s, border-color 0.2s;
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s;
   }
   .hangout-card:active {
     transform: scale(0.98);
@@ -244,11 +165,12 @@
     line-height: 1.3;
   }
 
+  /* Micro Grid Metrics Block */
   .card-metrics {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    border-top: 1px solid var(--thin-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
     padding-top: 12px;
   }
   .metric-item {
@@ -264,6 +186,7 @@
     align-items: center;
   }
   
+  /* Action Footer Inside Card */
   .card-action {
     margin-top: 2px;
   }
@@ -278,43 +201,47 @@
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
-    transition: filter 0.2s, background-color 0.2s, color 0.2s;
+    transition: filter 0.2s, background-color 0.2s;
     border: none;
     cursor: pointer;
   }
   .sf-btn-primary {
-    background: var(--label-primary);
-    color: var(--canvas);
+    background: #ffffff;
+    color: #000000;
   }
+  .sf-btn-primary:active { background: #e5e5ea; }
   .sf-btn-secondary {
-    background: var(--surface-tertiary);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--label-primary);
     border: 1px solid var(--thin-border);
   }
+  .sf-btn-secondary:active { background: rgba(255, 255, 255, 0.15); }
   .sf-btn-disabled {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.03);
     color: var(--label-quaternary);
     pointer-events: none;
-    border: 1px solid var(--thin-border);
+    border: 1px solid rgba(255, 255, 255, 0.02);
   }
 
+  /* Empty State Framework */
   .empty-state {
     text-align: center;
     padding: 48px 24px;
     color: var(--label-tertiary);
     font-size: 14px;
+    line-height: 1.5;
   }
 
-  /* Sheets & Overlay Framework */
+  /* iOS Spatial System Modals */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     z-index: 1000;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-end; /* Sheet style approach for structural mobile ease */
     justify-content: center;
     opacity: 0;
     pointer-events: none;
@@ -325,20 +252,20 @@
     pointer-events: auto;
   }
   .apple-sheet {
-    background: var(--surface-primary);
+    background: #151517;
     width: 100%;
     max-width: 480px;
     border-radius: 20px 20px 0 0;
     padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
     transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     border-top: 1px solid var(--thick-border);
-    max-height: 92vh;
-    overflow-y: auto;
   }
   .modal-overlay.active .apple-sheet {
     transform: translateY(0);
   }
+  
+  /* Sheet Grabber Handle */
   .sheet-handle {
     width: 36px;
     height: 5px;
@@ -346,6 +273,7 @@
     border-radius: var(--radius-pill);
     margin: -12px auto 20px;
   }
+
   .sheet-title {
     font-size: 20px;
     font-weight: 700;
@@ -356,11 +284,13 @@
   .sheet-subtitle {
     font-size: 13px;
     color: var(--label-tertiary);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
-  /* Form Architecture */
-  .form-group { margin-bottom: 16px; }
+  /* Premium Form Layouts */
+  .form-group {
+    margin-bottom: 16px;
+  }
   .form-label {
     display: block;
     font-size: 11px;
@@ -379,44 +309,19 @@
     padding: 12px;
     font-family: var(--font-sf);
     font-size: 15px;
-    color: var(--label-primary);
+    color: #ffffff;
     outline: none;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition: border-color 0.2s;
     appearance: none;
     -webkit-appearance: none;
   }
-  .input-sf:focus { border-color: var(--accent); }
+  .input-sf:focus {
+    border-color: var(--accent);
+  }
   .input-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .input-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-  /* Segmented Picker (iOS Native Style Theme Switcher) */
-  .segmented-control {
-    display: flex;
-    background: var(--surface-secondary);
-    padding: 3px;
-    border-radius: 10px;
-    border: 1px solid var(--thin-border);
-    margin-bottom: 20px;
-  }
-  .segment-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--label-secondary);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
-  }
-  .segment-btn.active {
-    background: var(--surface-primary);
-    color: var(--label-primary);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  }
-
-  /* Profile Structural Container */
+  /* Premium Profile Layout Container */
   .profile-avatar-container {
     display: flex;
     flex-direction: column;
@@ -429,6 +334,7 @@
     border-radius: 50%;
     border: 2px solid var(--accent);
     padding: 3px;
+    box-shadow: 0 0 16px var(--accent-glow);
   }
   .profile-pic-frame img {
     width: 100%;
@@ -446,7 +352,7 @@
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--label-tertiary);
-    background: var(--surface-secondary);
+    background: rgba(255,255,255,0.05);
     padding: 3px 8px;
     border-radius: var(--radius-pill);
     margin-top: 6px;
@@ -455,7 +361,7 @@
     background: var(--surface-secondary);
     border-radius: var(--radius-sf);
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     border: 1px solid var(--thin-border);
   }
   .info-row {
@@ -474,9 +380,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    padding: 4px 0;
   }
   .interest-pill {
-    background: var(--surface-tertiary);
+    background: rgba(255, 255, 255, 0.06);
     color: var(--label-secondary);
     font-size: 12px;
     font-weight: 500;
@@ -485,7 +392,7 @@
     border: 1px solid var(--thin-border);
   }
 
-  /* Floating Dock System Layout */
+  /* Floating Glass Tab Dock */
   .apple-dock {
     position: fixed;
     bottom: 24px;
@@ -503,8 +410,7 @@
     justify-content: space-between;
     align-items: center;
     z-index: 900;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
-    transition: background-color 0.3s, border-color 0.3s;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
   }
   .dock-item {
     background: none;
@@ -517,15 +423,20 @@
     cursor: pointer;
     padding: 8px;
     flex: 1;
+    transition: color 0.2s;
   }
+  .dock-item:active { color: var(--label-primary); }
+  .dock-item svg { width: 22px; height: 22px; }
   .dock-item span { font-size: 10px; font-weight: 500; }
+  
   .dock-avatar {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     object-fit: cover;
     border: 1.5px solid var(--label-tertiary);
   }
+
   .dock-center-fab {
     background: var(--accent);
     color: #ffffff;
@@ -537,22 +448,25 @@
     justify-content: center;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 12px var(--accent-glow);
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3);
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .dock-center-fab:active { transform: scale(0.92); }
-  .dock-center-fab svg { width: 24px; height: 24px; color: #ffffff; }
+  .dock-center-fab:active {
+    transform: scale(0.92);
+  }
+  .dock-center-fab svg { width: 24px; height: 24px; }
 
-  /* Context Theme Configurations Mapping */
-  .theme-coding { background: var(--overlay-coding); color: #38bdf8; }
-  .theme-goingout { background: var(--overlay-goingout); color: #f59e0b; }
-  .theme-rides { background: var(--overlay-rides); color: #10b981; }
-  .theme-sports { background: var(--overlay-sports); color: #a78bfa; }
-  .theme-other { background: var(--overlay-other); color: #f43f5e; }
-  .theme-default { background: var(--surface-tertiary); color: var(--label-primary); }
+  /* Context Category System Color Mappings */
+  .theme-coding { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+  .theme-goingout { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  .theme-rides { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .theme-sports { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
+  .theme-other { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+  .theme-default { background: rgba(255, 255, 255, 0.08); color: var(--label-primary); }
 </style>
 
 <div class="app-container">
+  <!-- Top App Navigation Architecture -->
   <header class="app-header">
     <div>
       <h1>Hangouts</h1>
@@ -564,6 +478,7 @@
     </div>
   </header>
 
+  <!-- Feed Framework -->
   <main class="feed-stream">
     {% for event in events %}
     {% set member_count = event.members.count() %}
@@ -596,7 +511,7 @@
           <div class="metric-icon">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
           </div>
-          <span>{{ member_count }}/{{ event.member_limit }}</span>
+          <span>{{ member_count }}/{{ event.member_limit }} · {{ event.host.name }}</span>
         </div>
         <div class="metric-item">
           <div class="metric-icon">
@@ -616,32 +531,41 @@
 
       <div class="card-action">
         {% if current_user in event.members %}
-        <a href="/chat/{{ event.id }}" class="sf-btn sf-btn-primary">Open Chat</a>
+        <a href="/chat/{{ event.id }}" class="sf-btn sf-btn-primary">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-3.057a1.526 1.526 0 0 1 .924-.313H19.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H4.5A2.25 2.25 0 0 0 2.25 6.75v6.75Z"/></svg>
+          Open Chat
+        </a>
         {% elif is_full %}
         <span class="sf-btn sf-btn-disabled">Plan is Full</span>
         {% else %}
-        <a href="/join-event/{{ event.id }}" id="join-{{ event.id }}" class="sf-btn sf-btn-secondary">Join Plan</a>
+        <a href="/join-event/{{ event.id }}" id="join-{{ event.id }}" class="sf-btn sf-btn-secondary">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Join Plan
+        </a>
         {% endif %}
       </div>
     </article>
     {% endfor %}
 
     {% if not events %}
-    <div class="empty-state">No live broadcasts on campus right now.</div>
+    <div class="empty-state">
+      <p>No live broadcasts on campus.</p>
+      <p style="font-size: 12px; margin-top: 4px; color: var(--label-quaternary);">Tap the button below to start one.</p>
+    </div>
     {% endif %}
   </main>
 </div>
 
-<!-- Modal: Create -->
+<!-- Modal Layer: Create -->
 <div id="modal-create" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-create')">
   <div class="apple-sheet">
     <div class="sheet-handle"></div>
     <p class="sheet-title">Broadcast a Plan</p>
-    <p class="sheet-subtitle">Instantly updates the campus grid network.</p>
+    <p class="sheet-subtitle">Instantly alerts the campus grid network.</p>
     <form action="/create-event" method="POST">
       <div class="form-group">
         <label class="form-label">Activity Heading</label>
-        <input type="text" name="title" required placeholder="e.g., Badminton Tourney" class="input-sf">
+        <input type="text" name="title" required placeholder="e.g., Badminton 5-Aside" class="input-sf">
       </div>
       <div class="input-grid-2 form-group">
         <div>
@@ -656,7 +580,7 @@
         </div>
         <div id="cat-custom" style="display: none;">
           <label class="form-label">Specify</label>
-          <input type="text" name="custom_details" placeholder="e.g., Chess Match" class="input-sf">
+          <input type="text" name="custom_details" placeholder="e.g., Chess Club" class="input-sf">
         </div>
       </div>
       <div class="input-grid-3 form-group">
@@ -684,7 +608,7 @@
         </div>
         <div>
           <label class="form-label">Hub / Spot</label>
-          <input type="text" name="location" required placeholder="e.g., Main Gate" class="input-sf">
+          <input type="text" name="location" required placeholder="e.g., Student Center" class="input-sf">
         </div>
       </div>
       <button type="submit" class="sf-btn sf-btn-primary" style="padding: 14px;">Publish Broadcast</button>
@@ -692,11 +616,10 @@
   </div>
 </div>
 
-<!-- Modal: Profile & System Settings -->
+<!-- Modal Layer: Profile -->
 <div id="modal-profile" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-profile')">
   <div class="apple-sheet">
     <div class="sheet-handle"></div>
-    
     <div class="profile-avatar-container">
       <div class="profile-pic-frame">
         <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" alt="Avatar">
@@ -704,22 +627,10 @@
       <p class="profile-name-title">{{ current_user.name }}</p>
       <span class="profile-id-badge">{{ current_user.roll_number }}</span>
     </div>
-
-    <!-- Interactive Themes Configuration Layout Matrix -->
-    <div class="form-group">
-      <label class="form-label">Interface Appearance</label>
-      <div class="segmented-control">
-        <button class="segment-btn" id="theme-auto" onclick="setInterfaceTheme('auto')">Auto</button>
-        <button class="segment-btn" id="theme-light" onclick="setInterfaceTheme('light')">Light</button>
-        <button class="segment-btn" id="theme-dark" onclick="setInterfaceTheme('dark')">Dark</button>
-      </div>
-    </div>
-
     <div class="info-list">
       <div class="info-row"><span>Institutional Email</span><span>{{ current_user.email }}</span></div>
       <div class="info-row"><span>Demographics</span><span>{{ current_user.age }} yrs · {{ current_user.gender }}</span></div>
     </div>
-    
     <div class="form-group">
       <label class="form-label">Interests Matrix</label>
       <div class="interest-cloud">
@@ -731,7 +642,7 @@
   </div>
 </div>
 
-<!-- Modal: Insights -->
+<!-- Modal Layer: Insights -->
 <div id="modal-stats" class="modal-overlay" onclick="handleOverlayClick(event, 'modal-stats')">
   <div class="apple-sheet">
     <div class="sheet-handle"></div>
@@ -751,7 +662,7 @@
   </div>
 </div>
 
-<!-- Tab Navigation Architecture Dock -->
+<!-- Apple Floating Navigation Dock -->
 <nav class="apple-dock">
   <button class="dock-item" onclick="openModal('modal-profile')">
     <img src="{{ url_for('static', filename='uploads/' + current_user.profile_pic) }}" class="dock-avatar" alt="Profile">
@@ -767,44 +678,32 @@
 </nav>
 
 <script>
-  // UI Presentation State Engines
   function openModal(id) {
-    document.getElementById(id).classList.add('active');
+    const modal = document.getElementById(id);
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    if(window.navigator.vibrate) window.navigator.vibrate(8);
+    if(window.navigator.vibrate) window.navigator.vibrate(8); /* Native micro haptic simulation */
   }
 
   function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
+    const modal = document.getElementById(id);
+    modal.classList.remove('active');
     document.body.style.overflow = '';
   }
 
   function handleOverlayClick(e, id) {
-    if (e.target.classList.contains('modal-overlay')) closeModal(id);
-  }
-
-  // Cross-Platform Active Theme Engine Configuration
-  function setInterfaceTheme(mode) {
-    const root = document.documentElement;
-    document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
-    
-    if (mode === 'auto') {
-      root.removeAttribute('data-theme');
-      document.getElementById('theme-auto').classList.add('active');
-      localStorage.removeItem('app-interface-preference');
-    } else {
-      root.setAttribute('data-theme', mode);
-      document.getElementById('theme-' + mode).classList.add('active');
-      localStorage.setItem('app-interface-preference', mode);
+    if (e.target.classList.contains('modal-overlay')) {
+      closeModal(id);
     }
   }
 
-  // System Mount Initialization Lifecycle Hook
-  document.addEventListener('DOMContentLoaded', () => {
-    const cachedPreference = localStorage.getItem('app-interface-preference') || 'auto';
-    setInterfaceTheme(cachedPreference);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(modal => closeModal(modal.id));
+    }
+  });
 
-    // Live Metrics Clock Ticking Initialization Loop
+  function runCountdowns() {
     const timers = document.querySelectorAll('.time-ticker');
     function tick() {
       const now = Date.now();
@@ -825,7 +724,9 @@
             el.textContent = 'Ended';
             el.className = 'time-ticker done';
             const jbtn = document.getElementById('join-' + id);
-            if (jbtn) jbtn.outerHTML = '<span class="sf-btn sf-btn-disabled">Closed</span>';
+            if (jbtn) {
+              jbtn.outerHTML = '<span class="sf-btn sf-btn-disabled">Closed</span>';
+            }
           }
           return;
         }
@@ -842,11 +743,8 @@
     }
     tick();
     setInterval(tick, 1000);
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
-  });
+  }
+  document.addEventListener('DOMContentLoaded', runCountdowns);
 </script>
 
 {% endblock %}
