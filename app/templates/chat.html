@@ -340,13 +340,22 @@
     <div class="status-pill" id="joinPill">You joined {{ event.title }}</div>
 
     {% for message in messages %}
-      <div class="chat-row {{ 'me' if message.user_id == current_user.id else 'them' }}">
-        {% if message.user_id != current_user.id %}
-          <span class="sender-label">{{ message.sender.name }}</span>
-        {% endif %}
-        <div class="bubble">{{ message.content }}</div>
-      </div>
-    {% endfor %}
+        <div class="flex items-start gap-2.5 {% if message.sender.id == current_user.id %}flex-row-reverse{% endif %}">
+            
+            <div class="p-1 bg-white rounded-full border border-slate-100 shadow-xs">
+                {{ message.sender.render_avatar("w-6 h-6") }}
+            </div>
+
+            <div class="flex flex-col max-w-[70%]">
+                <span class="text-[10px] text-slate-400 mb-0.5 {% if message.sender.id == current_user.id %}text-right{% endif %}">
+                    {{ message.sender.name }}
+                </span>
+                <p class="p-3 text-sm rounded-2xl shadow-xs {% if message.sender.id == current_user.id %}bg-indigo-600 text-white rounded-tr-none{% else %}bg-white text-slate-800 border border-slate-200 rounded-tl-none{% endif %}">
+                    {{ message.content }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
   </main>
 
   <footer class="bottom-dock">

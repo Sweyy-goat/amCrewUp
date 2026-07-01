@@ -18,6 +18,7 @@ def auth_login():
         action = request.form.get('action')
         
         # 1. NEW USER REGISTRATION ROUTINE
+        # Look for this block inside app/routes.py and ensure it mirrors this configuration:
         if action == 'signup':
             email = request.form.get('email')
             name = request.form.get('name')
@@ -26,6 +27,8 @@ def auth_login():
             age = request.form.get('age')
             gender = request.form.get('gender')
             interests = request.form.getlist('interests')
+            
+            # Reads string selection (e.g., 'avatar3.png') sent by form
             filename = request.form.get('profile_pic', 'avatar1.png')
 
             existing_user = User.query.filter((User.email == email) | (User.roll_number == roll_number)).first()

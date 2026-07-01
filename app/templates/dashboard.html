@@ -14,12 +14,12 @@
         <form action="/create-event" method="POST" class="space-y-4">
             <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1">Event Title</label>
-                <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" name="title" required placeholder="e.g., Sunday Turf Booking" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
-                    <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
+                    <select name="category" id="category-select" onchange="if(this.value=='other'){document.getElementById('custom-input').classList.remove('hidden')}else{document.getElementById('custom-input').classList.add('hidden')}" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none">
                         <option value="coding">💻 Coding</option>
                         <option value="going out">🍕 Going Out</option>
                         <option value="rides">🚗 Joined Rides</option>
@@ -29,21 +29,21 @@
                 </div>
                 <div id="custom-input" class="hidden">
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Specify Custom Event</label>
-                    <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="text" name="custom_details" placeholder="e.g., Movie Night" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
                 </div>
             </div>
             <div class="grid grid-cols-3 gap-2">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Total Cost (₹)</label>
-                    <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="number" name="total_cost" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Max Squad Size</label>
-                    <input type="number" name="member_limit" min="2" max="50" required placeholder="5" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="number" name="member_limit" min="2" max="50" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Gender Restriction</label>
-                    <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none bg-white focus:border-indigo-500">
+                    <select name="gender_preference" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none">
                         <option value="All">Open to All</option>
                         <option value="Male">Male Only</option>
                         <option value="Female">Female Only</option>
@@ -53,11 +53,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Time & Date</label>
-                    <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="datetime-local" name="event_time" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Pickup</label>
-                    <input type="text" name="location" required placeholder="e.g., Main Gate / Ground" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="text" name="location" required placeholder="e.g., Main Gate" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none">
                 </div>
             </div>
             <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Broadcast Plan</button>
@@ -69,9 +69,11 @@
     <div class="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
         <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg focus:outline-none">&times;</button>
         <div class="flex flex-col items-center text-center">
-            <div class="w-20 h-20 rounded-full bg-indigo-600 flex items-center justify-center text-3xl font-bold text-white mb-3 shadow-md border-2 border-white">
-                {{ current_user.name[0]|upper }}
+            
+            <div class="p-2 bg-slate-50 border border-slate-100 rounded-full mb-3 shadow-xs">
+                {{ current_user.render_avatar("w-20 h-20") }}
             </div>
+            
             <h3 class="font-bold text-xl text-slate-900">{{ current_user.name }}</h3>
             <span class="text-xs font-mono px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md mt-1">{{ current_user.roll_number }}</span>
             
@@ -102,14 +104,6 @@
             <div class="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
                 <span class="text-xs text-slate-600 font-medium">Total Active Broadcasts</span>
                 <span class="text-sm font-bold text-slate-900">{{ events|length }}</span>
-            </div>
-            <div class="p-3 bg-indigo-50/60 rounded-xl flex justify-between items-center">
-                <span class="text-xs text-indigo-700 font-medium">Your Matching Sync Slots</span>
-                <span class="text-sm font-bold text-indigo-600">
-                    {% set count = namespace(value=0) %}
-                    {% for e in events %}{% if e.search_score > 0 %}{% set count.value = count.value + 1 %}{% endif %}{% endfor %}
-                    {{ count.value }}
-                </span>
             </div>
         </div>
     </div>
@@ -156,15 +150,20 @@
         </div>
         
         <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <div class="flex flex-col truncate max-w-[140px]">
-                <span class="text-xs text-slate-400 truncate">Host: <span class="font-medium text-slate-700">{{ event.host.name }}</span></span>
-                {% if event.host != current_user %}
-                    {% if current_user.is_following(event.host) %}
-                        <a href="/unfollow/{{ event.host.id }}" class="text-[10px] text-indigo-600 font-semibold hover:underline">✓ Following (Unfollow)</a>
-                    {% else %}
-                        <a href="/follow/{{ event.host.id }}" class="text-[10px] text-slate-400 hover:text-indigo-600 font-semibold hover:underline">+ Follow Host</a>
+            <div class="flex items-center gap-2 max-w-[150px]">
+                <div class="p-1 bg-slate-50 border border-slate-100 rounded-full">
+                    {{ event.host.render_avatar("w-6 h-6") }}
+                </div>
+                <div class="flex flex-col truncate">
+                    <span class="text-xs font-medium text-slate-700 truncate">{{ event.host.name }}</span>
+                    {% if event.host != current_user %}
+                        {% if current_user.is_following(event.host) %}
+                            <a href="/unfollow/{{ event.host.id }}" class="text-[9px] text-indigo-600 font-semibold hover:underline">Unfollow</a>
+                        {% else %}
+                            <a href="/follow/{{ event.host.id }}" class="text-[9px] text-slate-400 hover:text-indigo-600 font-semibold hover:underline">+ Follow</a>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
+                </div>
             </div>
             <div id="action-wrapper-{{ event.id }}">
                 {% if current_user in event.members %}
@@ -182,9 +181,7 @@
     <div class="bg-slate-900/90 backdrop-blur-md shadow-xl border border-white/10 rounded-2xl px-6 py-3 flex justify-between items-center text-white">
         
         <button onclick="document.getElementById('profile-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 opacity-75 hover:opacity-100 transition focus:outline-none">
-            <div class="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white">
-                {{ current_user.name[0]|upper }}
-            </div>
+            {{ current_user.render_avatar("w-5 h-5 bg-white rounded-full p-0.5") }}
             <span class="text-[10px] font-medium tracking-tight">Profile</span>
         </button>
 
@@ -207,7 +204,6 @@
 <script>
     function initializeCampusCountdowns() {
         const badges = document.querySelectorAll('[id^="countdown-badge-"]');
-        
         function tick() {
             const now = new Date();
             badges.forEach(badge => {
@@ -219,7 +215,6 @@
                 if (timeDifference <= 0) {
                     const gracePeriod = 2 * 60 * 1000;
                     const timeSinceExpired = now - deadline;
-
                     if (isJoined && timeSinceExpired < gracePeriod) {
                         const remainingGrace = gracePeriod - timeSinceExpired;
                         const secondsLeft = Math.floor((remainingGrace / 1000) % 60);
@@ -237,17 +232,14 @@
                         return;
                     }
                 }
-
                 const totalSeconds = Math.floor(timeDifference / 1000);
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = Math.floor(totalSeconds % 60);
-
                 let timeString = "";
                 if (hours > 0) timeString += `${hours}h `;
                 timeString += `${minutes}m ${seconds}s`;
                 badge.innerText = `⏱️ ${timeString}`;
-                
                 if (totalSeconds < 300) {
                     badge.className = "text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 pulse-indicator whitespace-nowrap";
                 } else {
